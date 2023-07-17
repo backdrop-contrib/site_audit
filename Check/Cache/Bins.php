@@ -33,7 +33,7 @@ class SiteAuditCheckCacheBins extends SiteAuditCheckAbstract {
    */
   public function getResultInfo() {
     if (!empty($this->registry['cache_bins'])) {
-      if (drush_get_option('html')) {
+      if ($this->getOption('html')) {
         $ret_val = '<table class="table table-condensed">';
         $ret_val .= '<thead><tr><th>' . dt('Bin') . '</th><th>' . dt('Class') . '</th></tr></thead>';
         $ret_val .= '<tbody>';
@@ -45,13 +45,13 @@ class SiteAuditCheckCacheBins extends SiteAuditCheckAbstract {
       }
       else {
         $ret_val  = dt('Bin: Class') . PHP_EOL;
-        if (!drush_get_option('json')) {
+        if (!$this->getOption('json')) {
           $ret_val .= str_repeat(' ', 4);
         }
         $ret_val .= '----------';
         foreach ($this->registry['cache_bins'] as $bin => $class) {
           $ret_val .= PHP_EOL;
-          if (!drush_get_option('json')) {
+          if (!$this->getOption('json')) {
             $ret_val .= str_repeat(' ', 4);
           }
           $ret_val .= "$bin: $class";

@@ -62,7 +62,7 @@ class SiteAuditCheckExtensionsCount extends SiteAuditCheckAbstract {
       $options[] = dt('Consolidate functionality if possible, or custom develop a solution specific to your needs.');
       $options[] = dt('Avoid using modules that serve only one small purpose that is not mission critical.');
 
-      if (drush_get_option('html')) {
+      if ($this->getOption('html')) {
         $ret_val .= '<ul>';
         foreach ($options as $option) {
           $ret_val .= '<li>' . $option . '</li>';
@@ -71,12 +71,12 @@ class SiteAuditCheckExtensionsCount extends SiteAuditCheckAbstract {
       }
       else {
         foreach ($options as $option) {
-          if (!drush_get_option('json')) {
+          if (!$this->getOption('json')) {
             $ret_val .= str_repeat(' ', 6);
           }
           $ret_val .= '- ' . $option . PHP_EOL;
         }
-        if (!drush_get_option('json')) {
+        if (!$this->getOption('json')) {
           $ret_val .= str_repeat(' ', 6);
         }
       }
@@ -89,17 +89,15 @@ class SiteAuditCheckExtensionsCount extends SiteAuditCheckAbstract {
    */
   public function calculateScore() {
     $this->registry['extension_count'] = 0;
-    $this->registry['extensions'] = drush_get_extensions(FALSE);
+    $this->registry['extensions'] = system_rebuild_module_data();
 
     foreach ($this->registry['extensions'] as $extension) {
-      $status = drush_get_extension_status($extension);
-      if (!in_array($status, array('enabled'))) {
-        continue;
+      if ($extension->status) {
+        $this->registry['extension_count']++;
       }
-      $this->registry['extension_count']++;
     }
 
-    if ($this->registry['extension_count'] >= drush_get_option('extension_count', 150)) {
+    if ($this->registry['extension_count'] >= $this->getOption('extension_count', 150)) {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_WARN;
     }
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;

@@ -20,7 +20,7 @@ class SiteAuditCheckCodebaseSizeAll extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getDescription().
    */
   public function getDescription() {
-    return dt('Determine the size of the site root; does not include remote mounts.');
+    return dt('Determine the size of the site document root; does not include remote mounts or directories above index.php.');
   }
 
   /**
@@ -40,7 +40,7 @@ class SiteAuditCheckCodebaseSizeAll extends SiteAuditCheckAbstract {
       ));
     }
     return dt('Total size: @size_all_mbMB', array(
-      '@size_all_mb' => number_format($this->registry['size_all_kb'] / 1024, 2),
+      '@size_all_mb' => number_format(intval($this->registry['size_all_kb']) / 1024, 2),
     ));
   }
 
@@ -63,7 +63,7 @@ class SiteAuditCheckCodebaseSizeAll extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    $drupal_root = drush_get_context('DRUSH_SELECTED_DRUPAL_ROOT');
+    $drupal_root = DRUPAL_ROOT;
     exec('du -s -k -x ' . $drupal_root, $result);
     $this->registry['size_all_kb'] = trim($result[0]);
     if (!$this->registry['size_all_kb']) {

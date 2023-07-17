@@ -36,13 +36,13 @@ class SiteAuditCheckContentVocabularies extends SiteAuditCheckAbstract {
       return dt('The taxonomy module is not enabled.');
     }
     if (empty($this->registry['vocabulary_counts'])) {
-      if (drush_get_option('detail')) {
+      if ($this->getOption('detail')) {
         return dt('No vocabularies exist.');
       }
       return '';
     }
     $ret_val = '';
-    if (drush_get_option('html') == TRUE) {
+    if ($this->getOption('html') == TRUE) {
       $ret_val .= '<table class="table table-condensed">';
       $ret_val .= '<thead><tr><th>' . dt('Vocabulary') . '</th><th>' . dt('Terms') . '</th></tr></thead>';
       foreach ($this->registry['vocabulary_counts'] as $vocabulary => $count) {
@@ -52,13 +52,13 @@ class SiteAuditCheckContentVocabularies extends SiteAuditCheckAbstract {
     }
     else {
       $ret_val  = dt('Vocabulary: Count') . PHP_EOL;
-      if (!drush_get_option('json')) {
+      if (!$this->getOption('json')) {
         $ret_val .= str_repeat(' ', 4);
       }
       $ret_val .= '-------------------';
       foreach ($this->registry['vocabulary_counts'] as $vocabulary => $count) {
         $ret_val .= PHP_EOL;
-        if (!drush_get_option('json')) {
+        if (!$this->getOption('json')) {
           $ret_val .= str_repeat(' ', 4);
         }
         $ret_val .= $vocabulary . ': ' . $count;
@@ -106,7 +106,7 @@ class SiteAuditCheckContentVocabularies extends SiteAuditCheckAbstract {
       if ($row->count == 0) {
         $this->registry['vocabulary_unused'][] = $row->name;
       }
-      elseif (!drush_get_option('detail')) {
+      elseif (!$this->getOption('detail')) {
         continue;
       }
       $this->registry['vocabulary_counts'][$row->name] = $row->count;

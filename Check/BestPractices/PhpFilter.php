@@ -27,7 +27,7 @@ class SiteAuditCheckBestPracticesPhpFilter extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getResultFail().
    */
   public function getResultFail() {
-    if (drush_get_option('detail')) {
+    if ($this->getOption('detail')) {
       return dt('PHP Filter is enabled! Executable code should never be stored in the database, and support for this feature was removed in Drupal 8 - https://drupal.org/node/1203886');
     }
     else {

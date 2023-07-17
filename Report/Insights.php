@@ -17,9 +17,9 @@ class SiteAuditReportInsights extends SiteAuditReportAbstract {
    * @param string $key
    *   Google API key.
    */
-  public function __construct($url, $key) {
-    $this->registry['url'] = $url;
-    $this->registry['key'] = $key;
+  public function __construct($url = null, $key = null) {
+    $this->registry['url'] = $url ?: variable_get('site_audit_pagespeed_url');
+    $this->registry['key'] = $key ?: variable_get('site_audit_pagespeed_api_key');
     parent::__construct();
   }
 

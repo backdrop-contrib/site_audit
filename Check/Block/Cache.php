@@ -65,7 +65,7 @@ class SiteAuditCheckBlockCache extends SiteAuditCheckAbstract {
    */
   public function calculateScore() {
     global $conf;
-    if ($conf['block_cache']) {
+    if (!empty($conf['block_cache'])) {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
     }
     // Same as block_form_system_performance_settings_alter().

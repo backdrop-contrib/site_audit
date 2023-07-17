@@ -59,7 +59,7 @@ class SiteAuditCheckCacheDefaultClass extends SiteAuditCheckAbstract {
    */
   public function calculateScore() {
     $this->registry['cache_default_class'] = variable_get('cache_default_class', 'DrupalDatabaseCache');
-    if ($this->registry['cache_default_class'] == 'DrupalDatabaseCache' && is_array($this->registry['cache_backends']) && !empty($this->registry['cache_backends'])) {
+    if ($this->registry['cache_default_class'] == 'DrupalDatabaseCache' && !empty($this->registry['cache_backends']) && is_array($this->registry['cache_backends']) && !empty($this->registry['cache_backends'])) {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_WARN;
     }
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;

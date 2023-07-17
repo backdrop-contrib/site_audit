@@ -58,13 +58,7 @@ class SiteAuditCheckDatabaseSize extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    if (version_compare(DRUSH_VERSION, 7, '>=')) {
-      $sql = drush_sql_get_class();
-      $db_spec = $sql->db_spec();
-    }
-    else {
-      $db_spec = _drush_sql_get_db_spec();
-    }
+    $db_spec = Database::getConnectionInfo()['default'];
 
     try {
       $sql_query = 'SELECT SUM(TABLES.data_length + TABLES.index_length) ';

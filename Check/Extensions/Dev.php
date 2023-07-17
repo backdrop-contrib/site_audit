@@ -54,15 +54,16 @@ class SiteAuditCheckExtensionsDev extends SiteAuditCheckAbstract {
       $show_table = FALSE;
     }
 
-    if (drush_get_option('detail')) {
-      if (drush_get_option('html')) {
+    if ($this->getOption('detail')) {
+      if ($this->getOption('html')) {
         if ($show_table) {
           $ret_val .= '<br/>';
           $ret_val .= '<table class="table table-condensed">';
           $ret_val .= '<thead><tr><th>' . dt('Name') . '</th><th>' . dt('Reason') . '</th></thead>';
           $ret_val .= '<tbody>';
-          foreach ($this->registry['extensions_dev'] as $row) {
-            $ret_val .= '<tr><td>' . implode('</td><td>', $row) . '</td></tr>';
+          foreach ($this->registry['extensions_dev'] as $name => $description) {
+            $description = implode('<br>', array_filter($description));
+            $ret_val .= "<tr><td>$name</td><td>$description</td</tr>";
           }
           $ret_val .= '</tbody>';
           $ret_val .= '</table>';
@@ -71,7 +72,7 @@ class SiteAuditCheckExtensionsDev extends SiteAuditCheckAbstract {
       elseif ($show_table) {
         foreach ($this->registry['extensions_dev'] as $row) {
           $ret_val .= PHP_EOL;
-          if (!drush_get_option('json')) {
+          if (!$this->getOption('json')) {
             $ret_val .= str_repeat(' ', 6);
           }
           $ret_val .= '- ' . $row[0] . ': ' . $row[1];
@@ -102,14 +103,14 @@ class SiteAuditCheckExtensionsDev extends SiteAuditCheckAbstract {
   public function calculateScore() {
     $this->registry['extensions_dev'] = array();
     $extension_info = $this->registry['extensions'];
-    uasort($extension_info, '_drush_pm_sort_extensions');
+    if (empty($extension_info)) {
+      return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
+    }
     $dev_extensions = $this->getExtensions();
 
     foreach ($extension_info as $key => $extension) {
-      $row = array();
-      $status = drush_get_extension_status($extension);
       // Only enabled extensions.
-      if (!in_array($status, array('enabled'))) {
+      if (!$extension->status) {
         unset($extension_info[$key]);
         continue;
       }
@@ -128,7 +129,7 @@ class SiteAuditCheckExtensionsDev extends SiteAuditCheckAbstract {
       }
 
       // Name.
-      $row[] = $extension->label;
+      $row[] = $extension->name;
       // Reason.
       $row[] = $dev_extensions[$extension->name];
 

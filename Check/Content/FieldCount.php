@@ -41,8 +41,8 @@ class SiteAuditCheckContentFieldCount extends SiteAuditCheckAbstract {
     $ret_val = dt('There are @count total fields.', array(
       '@count' => count($this->registry['field_api_map']),
     ));
-    if (drush_get_option('detail')) {
-      if (drush_get_option('html')) {
+    if ($this->getOption('detail')) {
+      if ($this->getOption('html')) {
         $ret_val .= '<p>' . $ret_val . '</p>';
         $ret_val .= '<table class="table table-condensed">';
         $ret_val .= '<tr><th>' . dt('Name') . '</th><th>' . dt('Type') . '</th></tr>';
@@ -53,17 +53,17 @@ class SiteAuditCheckContentFieldCount extends SiteAuditCheckAbstract {
       }
       else {
         $ret_val .= PHP_EOL;
-        if (!drush_get_option('json')) {
+        if (!$this->getOption('json')) {
           $ret_val .= str_repeat(' ', 4);
         }
         $ret_val .= dt('Name: Type') . PHP_EOL;
-        if (!drush_get_option('json')) {
+        if (!$this->getOption('json')) {
           $ret_val .= str_repeat(' ', 4);
         }
         $ret_val .= '----------';
         foreach ($this->registry['field_api_map'] as $field_name => $field_data) {
           $ret_val .= PHP_EOL;
-          if (!drush_get_option('json')) {
+          if (!$this->getOption('json')) {
             $ret_val .= str_repeat(' ', 4);
           }
           $ret_val .= $field_name . ': ' . $field_data['type'];

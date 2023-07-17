@@ -63,7 +63,7 @@ class SiteAuditCheckCacheAnon extends SiteAuditCheckAbstract {
    */
   public function calculateScore() {
     global $conf;
-    if ($conf['cache']) {
+    if (!empty($conf['cache'])) {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
     }
     if (site_audit_env_is_dev()) {

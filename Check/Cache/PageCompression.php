@@ -20,7 +20,7 @@ class SiteAuditCheckCachePageCompression extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getDescription().
    */
   public function getDescription() {
-    if (drush_get_option('vendor') == 'pantheon') {
+    if ($this->getOption('vendor') == 'pantheon') {
       return dt('Verify that Drupal is not set to compress cached pages.');
     }
     else {
@@ -32,7 +32,7 @@ class SiteAuditCheckCachePageCompression extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getResultFail().
    */
   public function getResultFail() {
-    if (drush_get_option('vendor') == 'pantheon') {
+    if ($this->getOption('vendor') == 'pantheon') {
       return dt('Cached pages are compressed!');
     }
     else {
@@ -49,7 +49,7 @@ class SiteAuditCheckCachePageCompression extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getResultPass().
    */
   public function getResultPass() {
-    if (drush_get_option('vendor') == 'pantheon') {
+    if ($this->getOption('vendor') == 'pantheon') {
       return dt('Cached pages are not compressed.');
     }
     else {
@@ -67,7 +67,7 @@ class SiteAuditCheckCachePageCompression extends SiteAuditCheckAbstract {
    */
   public function getAction() {
     if (!in_array($this->score, array(SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS))) {
-      if (drush_get_option('vendor') == 'pantheon') {
+      if ($this->getOption('vendor') == 'pantheon') {
         return dt('Pantheon compresses your pages for you. Don\'t make Drupal do the work! Go to /admin/config/development/performance and uncheck "Compress cached pages".');
       }
       else {
@@ -81,13 +81,13 @@ class SiteAuditCheckCachePageCompression extends SiteAuditCheckAbstract {
    */
   public function calculateScore() {
     global $conf;
-    if (drush_get_option('vendor') == 'pantheon') {
+    if ($this->getOption('vendor') == 'pantheon') {
       if (!$conf['page_compression']) {
         return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
       }
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL;
     }
-    if (!$conf['page_compression']) {
+    if (empty($conf['page_compression'])) {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL;
     }
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;

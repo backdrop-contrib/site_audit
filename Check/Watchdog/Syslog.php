@@ -56,7 +56,7 @@ class SiteAuditCheckWatchdogSyslog extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getAction().
    */
   public function getAction() {
-    if ($this->getScore() == SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL && drush_get_option('vendor') == 'pantheon') {
+    if ($this->getScore() == SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL && $this->getOption('vendor') == 'pantheon') {
       return dt('On Pantheon, you can technically write to syslog, but there is no mechanism for reading it. Disable syslog and enable dblog instead.');
     }
   }
@@ -67,7 +67,7 @@ class SiteAuditCheckWatchdogSyslog extends SiteAuditCheckAbstract {
   public function calculateScore() {
     $this->registry['syslog_enabled'] = module_exists('syslog');
     if ($this->registry['syslog_enabled']) {
-      if (drush_get_option('vendor') == 'pantheon') {
+      if ($this->getOption('vendor') == 'pantheon') {
         return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL;
       }
     }

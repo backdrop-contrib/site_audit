@@ -63,7 +63,7 @@ class SiteAuditCheckCachePreprocessJs extends SiteAuditCheckAbstract {
    */
   public function calculateScore() {
     global $conf;
-    if ($conf['preprocess_js']) {
+    if (!empty($conf['preprocess_js'])) {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
     }
     if (site_audit_env_is_dev()) {

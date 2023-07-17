@@ -61,7 +61,7 @@ class SiteAuditCheckCodebaseManagedFileSize extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    if (!$this->registry['managed_file_count']) {
+    if (empty($this->registry['managed_file_count'])) {
       $this->registry['managed_filesize'] = 0;
     }
     else {

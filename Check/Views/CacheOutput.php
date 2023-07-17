@@ -62,7 +62,7 @@ class SiteAuditCheckViewsCacheOutput extends SiteAuditCheckAbstract {
   public function getAction() {
     if (!in_array($this->score, array(SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO, SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS))) {
       $ret_val = dt('Rendered output should be cached for as long as possible (if the query changes, the output will be refreshed).');
-      if (drush_get_option('detail')) {
+      if ($this->getOption('detail')) {
         $steps = array(
           dt('Go to /admin/structure/views/'),
           dt('Edit the View in question'),
@@ -71,10 +71,10 @@ class SiteAuditCheckViewsCacheOutput extends SiteAuditCheckAbstract {
           dt('Next to Caching, click to edit.'),
           dt('Rendered output: (something other than Never cache)'),
         );
-        if (drush_get_option('html') == TRUE) {
+        if ($this->getOption('html') == TRUE) {
           $ret_val .= '<ol><li>' . implode('</li><li>', $steps) . '</li></ol>';
         }
-        elseif (drush_get_option('json')) {
+        elseif ($this->getOption('json')) {
           $ret_val = array(
             'Summary' => $ret_val,
             'Steps' => $steps,
@@ -174,7 +174,7 @@ class SiteAuditCheckViewsCacheOutput extends SiteAuditCheckAbstract {
           }
         }
         if ($all_default_displays) {
-          if ($view_data['default'] == 'none') {
+          if (!empty($view_data['default']) && $view_data['default'] == 'none') {
             $this->registry['views_without_output_caching'][] = $view_name;
           }
         }

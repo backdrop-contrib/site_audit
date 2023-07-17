@@ -82,6 +82,9 @@ class SiteAuditCheckWatchdogPhp extends SiteAuditCheckAbstract {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
     }
 
+    if (!function_exists('core_watchdog_query')) {
+      return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
+    }
     $where = core_watchdog_query('php', NULL, NULL);
     $rsc = drush_db_select('watchdog', '*', $where['where'], $where['args'], 0, NULL, 'wid', 'DESC');
     while ($result = drush_db_fetch_object($rsc)) {

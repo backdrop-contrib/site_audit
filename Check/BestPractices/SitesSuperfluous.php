@@ -62,7 +62,7 @@ class SiteAuditCheckBestPracticesSitesSuperfluous extends SiteAuditCheckAbstract
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    $drupal_root = drush_get_context('DRUSH_SELECTED_DRUPAL_ROOT');
+    $drupal_root = DRUPAL_ROOT;
     $handle = opendir($drupal_root . '/sites/');
     $this->registry['superfluous'] = array();
     while (FALSE !== ($entry = readdir($handle))) {
@@ -77,7 +77,7 @@ class SiteAuditCheckBestPracticesSitesSuperfluous extends SiteAuditCheckAbstract
       ))) {
         if (is_file($drupal_root . '/sites/' . $entry)) {
           // Support multi-site directory aliasing for non-Pantheon sites.
-          if ($entry != 'sites.php' || drush_get_option('vendor') == 'pantheon') {
+          if ($entry != 'sites.php' || $this->getOption('vendor') == 'pantheon') {
             $this->registry['superfluous'][] = $entry;
           }
         }

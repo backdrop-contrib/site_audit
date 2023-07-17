@@ -32,7 +32,7 @@ class SiteAuditCheckBlockCacheReport extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getResultInfo().
    */
   public function getResultInfo() {
-    if (drush_get_option('html')) {
+    if ($this->getOption('html')) {
       $ret_val = '<table class="table table-condensed">';
       $ret_val .= '<thead><tr><th>' . dt('Module') . '</th><th>' . dt('Block') . '</th><th>' . dt('State') . '</th></tr></thead>';
       $ret_val .= '<tbody>';
@@ -48,13 +48,13 @@ class SiteAuditCheckBlockCacheReport extends SiteAuditCheckAbstract {
     }
     else {
       $ret_val  = dt('Module - Info: State') . PHP_EOL;
-      if (!drush_get_option('json')) {
+      if (!$this->getOption('json')) {
         $ret_val .= str_repeat(' ', 4);
       }
       $ret_val .= '--------------------';
       foreach ($this->registry['blocks'] as $block) {
         $ret_val .= PHP_EOL;
-        if (!drush_get_option('json')) {
+        if (!$this->getOption('json')) {
           $ret_val .= str_repeat(' ', 4);
         }
         $ret_val .= "{$block['module']} - {$block['info']}: {$block['state']}";
@@ -84,7 +84,7 @@ class SiteAuditCheckBlockCacheReport extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    $blocks = _block_rehash($this->registry['theme_default']);
+    $blocks = _block_rehash($this->registry['theme_default'] ?? null);
     // Only check enabled blocks.
     foreach ($blocks as $bid => $block) {
       if ($block['region'] == -1) {

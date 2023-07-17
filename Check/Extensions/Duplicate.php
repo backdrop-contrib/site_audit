@@ -45,7 +45,7 @@ class SiteAuditCheckExtensionsDuplicate extends SiteAuditCheckAbstract {
    */
   public function getResultWarn() {
     $ret_val = dt('The following duplicate extensions were found:');
-    if (drush_get_option('html')) {
+    if ($this->getOption('html')) {
       $ret_val = '<p>' . $ret_val . '</p>';
       $ret_val .= '<table class="table table-condensed">';
       $ret_val .= '<thead><tr><th>' . dt('Name') . '</th><th>' . dt('Paths') . '</th></thead>';
@@ -68,7 +68,7 @@ class SiteAuditCheckExtensionsDuplicate extends SiteAuditCheckAbstract {
     else {
       foreach ($this->registry['extensions_dupe'] as $name => $extension_infos) {
         $ret_val .= PHP_EOL;
-        if (!drush_get_option('json')) {
+        if (!$this->getOption('json')) {
           $ret_val .= str_repeat(' ', 6);
         }
         $ret_val .= $name . PHP_EOL;
@@ -101,7 +101,7 @@ class SiteAuditCheckExtensionsDuplicate extends SiteAuditCheckAbstract {
    */
   public function calculateScore() {
     $this->registry['extensions_dupe'] = array();
-    $drupal_root = drush_get_context('DRUSH_SELECTED_DRUPAL_ROOT');
+    $drupal_root = DRUPAL_ROOT;
     $command = "find $drupal_root -xdev -type f -name '*.info' -o -path './" . variable_get('file_public_path', conf_path() . '/files') . "' -prune";
     exec($command, $result);
     foreach ($result as $path) {

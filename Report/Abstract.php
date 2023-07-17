@@ -71,14 +71,13 @@ abstract class SiteAuditReportAbstract {
     $percent_override = NULL;
 
     $checks_to_skip = array();
-    if (drush_get_option('skip')) {
-      $checks_to_skip = explode(',', drush_get_option('skip'));
+    if ($this->getOption('skip')) {
+      $checks_to_skip = explode(',', $this->getOption('skip'));
     }
 
     $checks_to_perform = $this->getCheckNames();
-
     foreach ($checks_to_perform as $key => $check_name) {
-      if (in_array($this->getReportName() . $check_name, $checks_to_skip)) {
+      if (in_array($check_name, $checks_to_skip)) {
         unset($checks_to_perform[$key]);
       }
     }
@@ -175,10 +174,10 @@ abstract class SiteAuditReportAbstract {
     if ($this->percent == 100) {
       drush_log(str_repeat(' ', 2) . dt('No action required.'), 'success');
     }
-    if (drush_get_option('detail') || $this->percent != 100) {
+    if ($this->getOption('detail') || $this->percent != 100) {
       foreach ($this->checks as $check) {
-        if (drush_get_option('detail') || $check->getScore() != SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS || $this->percent == SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO) {
-          if (drush_get_option('detail')) {
+        if ($this->getOption('detail') || $check->getScore() != SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS || $this->percent == SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO) {
+          if ($this->getOption('detail')) {
             drush_print(str_repeat(' ', 2) . dt('!label: !description', array(
               '!label' => $check->getLabel(),
               '!description' => $check->getDescription(),
@@ -191,8 +190,8 @@ abstract class SiteAuditReportAbstract {
               )));
             }
           }
-          if ($this->percent == SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO || drush_get_option('detail')) {
-            if (($check->getScore() != SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO) || drush_get_option('detail')) {
+          if ($this->percent == SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO || $this->getOption('detail')) {
+            if (($check->getScore() != SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO) || $this->getOption('detail')) {
               drush_print(str_repeat(' ', 4) . dt('!result', array(
                 '!result' => $check->getResult(),
               )));
@@ -238,20 +237,20 @@ abstract class SiteAuditReportAbstract {
       $ret_val .= '<strong>' . dt('Well done!') . '</strong> ' . dt('No action required.');
       $ret_val .= '</p>';
     }
-    if (drush_get_option('detail') || $this->percent != 100) {
+    if ($this->getOption('detail') || $this->percent != 100) {
       foreach ($this->checks as $check) {
-        if (drush_get_option('detail') || $check->getScore() != SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS || $this->percent == SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO) {
+        if ($this->getOption('detail') || $check->getScore() != SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS || $this->percent == SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO) {
           $ret_val .= '<div class="panel panel-' . $check->getScoreCssClass() . '">';
           // Heading.
           $ret_val .= '<div class="panel-heading"><strong>' . $check->getLabel() . '</strong>';
-          if (drush_get_option('detail')) {
+          if ($this->getOption('detail')) {
             $ret_val .= '<small> - ' . $check->getDescription() . '</small>';
           }
           $ret_val .= '</div>';
           // Result.
-          $ret_val .= '<p>' . $check->getResult() . '</p>';
+          $ret_val .= '<div class="panel-body">' . $check->getResult() . '</div>';
           if ($check->renderAction()) {
-            $ret_val .= '<div class="well well-small">' . $check->renderAction() . '</div>';
+            $ret_val .= '<blockquote>' . $check->renderAction() . '</blockquote>';
           }
           $ret_val .= '</div>';
         }
@@ -268,17 +267,17 @@ abstract class SiteAuditReportAbstract {
     if (empty($this->checks)) {
       return;
     }
-    if (drush_get_option('html')) {
+    if ($this->getOption('html')) {
       $command = drush_get_command();
-      if (drush_get_option('bootstrap') && ($command['command'] != 'audit_all')) {
+      if ($this->getOption('bootstrap') && ($command['command'] != 'audit_all')) {
         echo file_get_contents(SITE_AUDIT_BASE_PATH . '/html/header.html');
       }
       echo $this->toHtml();
-      if (drush_get_option('bootstrap') && ($command['command'] != 'audit_all')) {
+      if ($this->getOption('bootstrap') && ($command['command'] != 'audit_all')) {
         echo file_get_contents(SITE_AUDIT_BASE_PATH . '/html/footer.html');
       }
     }
-    elseif (drush_get_option('json')) {
+    elseif ($this->getOption('json')) {
       echo $this->toJson();
     }
     else {
@@ -335,33 +334,58 @@ abstract class SiteAuditReportAbstract {
    *   Machine readable names.
    */
   public function getCheckNames() {
-    $commands = drush_get_commands();
-
-    // Guess the name of the Drush command.
-    $command_name_pieces = preg_split('/(?=[A-Z])/', get_called_class());
-    unset($command_name_pieces[0], $command_name_pieces[1], $command_name_pieces[3]);
-    $command_name = strtolower(implode('_', $command_name_pieces));
-    $command = $commands[$command_name];
-
-    drush_command_invoke_all_ref('drush_command_alter', $command);
-
-    $checks = array();
-    foreach ($command['checks'] as $check) {
-      if (is_array($check)) {
-        $checks[] = $check['name'];
-        require_once $check['location'];
-      }
-      else {
-        $checks[] = $check;
-        $base_class_name = 'SiteAuditCheck' . $this->getReportName();
-        $class_name = $base_class_name . $check;
-        if (!class_exists($class_name)) {
-          require_once SITE_AUDIT_BASE_PATH . "/Check/{$this->getReportName()}/$check.php";
-        }
-      }
+//    $commands = drush_get_commands();
+//
+//    // Guess the name of the Drush command.
+//    $command_name_pieces = preg_split('/(?=[A-Z])/', get_called_class());
+//    unset($command_name_pieces[0], $command_name_pieces[1], $command_name_pieces[3]);
+//    $command_name = strtolower(implode('_', $command_name_pieces));
+//    $command = $commands[$command_name];
+//
+//    drush_command_invoke_all_ref('drush_command_alter', $command);
+//
+//    $checks = array();
+//    foreach ($command['checks'] as $check) {
+//      if (is_array($check)) {
+//        $checks[] = $check['name'];
+//        require_once $check['location'];
+//      }
+//      else {
+//        $checks[] = $check;
+//        $base_class_name = 'SiteAuditCheck' . $this->getReportName();
+//        $class_name = $base_class_name . $check;
+//        if (!class_exists($class_name)) {
+//          require_once SITE_AUDIT_BASE_PATH . "/Check/{$this->getReportName()}/$check.php";
+//        }
+//      }
+//    }
+    $checks = [];
+    $check_files = file_scan_directory(__dir__ . '/../Check/' . $this->getReportName(), '/\.php/');
+    foreach ($check_files as $check) {
+      require_once $check->uri;
+      $checks[] = $check->name;
     }
-
     return $checks;
   }
 
+  /**
+   * drush_get_option if running with drush. Sane defaults when called in Drupal.
+   */
+  static public function getOption($name, $default = null) {
+    if (php_sapi_name() == 'cli' && function_exists('drush_get_option')) {
+      return drush_get_option($name, $default);
+    }
+    elseif (php_sapi_name() == 'cli' && !function_exists('drush_get_option')) {
+      throw new Exception('Drush not found. This class must be used with Drush.');
+    }
+
+    // Force default values for the web. Doesn't make sense for them to configurable.
+    $web_values = array(
+      'html' => true,
+      'json' => false,
+      'detail' => true,
+      'skip' => '',
+    );
+    return $web_values[$name] ?? $default;
+  }
 }

@@ -28,7 +28,7 @@ class SiteAuditCheckExtensionsSecurity extends SiteAuditCheckAbstract {
    */
   public function getResultFail() {
     $ret_val = 'The following project(s) have security releases available:';
-    if (drush_get_option('html')) {
+    if ($this->getOption('html')) {
       $ret_val = '<p>' . $ret_val . '</p>';
       $ret_val .= '<table class="table table-condensed">';
       $ret_val .= '<thead><tr><th>' . dt('Name') . '</th><th>' . dt('Existing') . '</th><th>' . dt('Candidate') . '</th></thead>';
@@ -46,7 +46,7 @@ class SiteAuditCheckExtensionsSecurity extends SiteAuditCheckAbstract {
     else {
       foreach ($this->registry['projects_security'] as $short_info) {
         $ret_val .= PHP_EOL;
-        if (!drush_get_option('json')) {
+        if (!$this->getOption('json')) {
           $ret_val .= str_repeat(' ', 6);
         }
         $ret_val .= "- {$short_info['label']}: {$short_info['existing_version']} to {$short_info['candidate_version']}";

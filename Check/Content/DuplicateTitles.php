@@ -46,7 +46,7 @@ class SiteAuditCheckContentDuplicateTitles extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getResultWarn().
    */
   public function getResultWarn() {
-    if (!drush_get_option('detail')) {
+    if (!$this->getOption('detail')) {
       return dt('There are @count duplicate titles in the following types: @types', array(
         '@count' => $this->registry['nodes_duplicate_title_count'],
         '@types' => implode(', ', array_keys($this->registry['nodes_duplicate_titles'])),
@@ -54,7 +54,7 @@ class SiteAuditCheckContentDuplicateTitles extends SiteAuditCheckAbstract {
     }
 
     $ret_val = '';
-    if (drush_get_option('html') == TRUE) {
+    if ($this->getOption('html') == TRUE) {
       $ret_val .= '<table class="table table-condensed">';
       $ret_val .= '<thead><tr><th>' . dt('Content Type') . '</th><th>Title</th><th>' . dt('Count') . '</th></tr></thead>';
       foreach ($this->registry['nodes_duplicate_titles'] as $content_type => $title_counts) {
@@ -66,14 +66,14 @@ class SiteAuditCheckContentDuplicateTitles extends SiteAuditCheckAbstract {
     }
     else {
       $ret_val  = dt('Content Type: "Title" (Count)') . PHP_EOL;
-      if (!drush_get_option('json')) {
+      if (!$this->getOption('json')) {
         $ret_val .= str_repeat(' ', 4);
       }
       $ret_val .= '-----------------------------';
       foreach ($this->registry['nodes_duplicate_titles'] as $content_type => $title_counts) {
         foreach ($title_counts as $title => $count) {
           $ret_val .= PHP_EOL;
-          if (!drush_get_option('json')) {
+          if (!$this->getOption('json')) {
             $ret_val .= str_repeat(' ', 4);
           }
           $ret_val .= "$content_type: \"$title\" ($count)";

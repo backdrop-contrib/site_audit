@@ -30,8 +30,8 @@ class SiteAuditCheckExtensionsUnrecommended extends SiteAuditCheckAbstract {
     $ret_val = dt('The following unrecommended modules(s) currently exist in your codebase: @list', array(
       '@list' => implode(', ', array_keys($this->registry['extensions_unrec'])),
     ));
-    if (drush_get_option('detail')) {
-      if (drush_get_option('html')) {
+    if ($this->getOption('detail')) {
+      if ($this->getOption('html')) {
         $ret_val .= '<br/>';
         $ret_val .= '<table class="table table-condensed">';
         $ret_val .= '<thead><tr><th>' . dt('Name') . '</th><th>' . dt('Reason') . '</th></thead>';
@@ -45,7 +45,7 @@ class SiteAuditCheckExtensionsUnrecommended extends SiteAuditCheckAbstract {
       else {
         foreach ($this->registry['extensions_unrec'] as $row) {
           $ret_val .= PHP_EOL;
-          if (!drush_get_option('json')) {
+          if (!$this->getOption('json')) {
             $ret_val .= str_repeat(' ', 6);
           }
           $ret_val .= '- ' . $row[0] . ': ' . $row[1];
@@ -86,8 +86,12 @@ class SiteAuditCheckExtensionsUnrecommended extends SiteAuditCheckAbstract {
    */
   public function calculateScore() {
     $this->registry['extensions_unrec'] = array();
+    $this->registry['extensions'] = system_rebuild_module_data();
     $extension_info = $this->registry['extensions'];
-    uasort($extension_info, '_drush_pm_sort_extensions');
+
+    if (empty($extension_info)) {
+      return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
+    }
     $unrecommended_extensions = $this->getExtensions();
 
     foreach ($extension_info as $extension) {
@@ -142,7 +146,7 @@ class SiteAuditCheckExtensionsUnrecommended extends SiteAuditCheckAbstract {
       'supercron' => dt('Abandoned due to security concerns. https://drupal.org/node/1401644'),
     );
 
-    if (drush_get_option('vendor') == 'acquia') {
+    if ($this->getOption('vendor') == 'acquia') {
       $acquia_unrecommended_modules = array(
         'pantheon_apachesolr' => dt('The Pantheon Solr integration does not work on Acquia.'),
         'pantheon_api' => dt('The Pantheon API does not work on Acquia.'),
@@ -152,7 +156,7 @@ class SiteAuditCheckExtensionsUnrecommended extends SiteAuditCheckAbstract {
       $unrecommended_modules = array_merge($unrecommended_modules, $acquia_unrecommended_modules);
     }
 
-    if (drush_get_option('vendor') == 'pantheon') {
+    if ($this->getOption('vendor') == 'pantheon') {
       $pantheon_unrecommended_modules = array(
         'memcache' => dt('Pantheon does not provide memcache; instead, redis is provided as a service; see http://helpdesk.getpantheon.com/customer/portal/articles/401317'),
         'memcache_storage' => dt('Pantheon does not provide memcache; instead, redis is provided as a service to all customers; see http://helpdesk.getpantheon.com/customer/portal/articles/401317'),

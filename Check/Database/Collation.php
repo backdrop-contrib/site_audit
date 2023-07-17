@@ -32,7 +32,7 @@ class SiteAuditCheckDatabaseCollation extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getResultInfo().
    */
   public function getResultInfo() {
-    if (drush_get_option('html')) {
+    if ($this->getOption('html')) {
       $ret_val = '<table class="table table-condensed">';
       $ret_val .= '<thead><tr><th>' . dt('Table Name') . '</th><th>' . dt('Collation') . '</th></tr></thead>';
       $ret_val .= '<tbody>';
@@ -47,13 +47,13 @@ class SiteAuditCheckDatabaseCollation extends SiteAuditCheckAbstract {
     }
     else {
       $ret_val  = dt('Table Name: Collation') . PHP_EOL;
-      if (!drush_get_option('json')) {
+      if (!$this->getOption('json')) {
         $ret_val .= str_repeat(' ', 4);
       }
       $ret_val .= '---------------------';
       foreach ($this->registry['collation_tables'] as $name => $collation) {
         $ret_val .= PHP_EOL;
-        if (!drush_get_option('json')) {
+        if (!$this->getOption('json')) {
           $ret_val .= str_repeat(' ', 4);
         }
         $ret_val .= "$name: $collation";
@@ -91,13 +91,7 @@ class SiteAuditCheckDatabaseCollation extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    if (version_compare(DRUSH_VERSION, 7, '>=')) {
-      $sql = drush_sql_get_class();
-      $db_spec = $sql->db_spec();
-    }
-    else {
-      $db_spec = _drush_sql_get_db_spec();
-    }
+    $db_spec = Database::getConnectionInfo()['default'];
 
     $sql_query  = 'SELECT TABLE_NAME AS name ';
     $sql_query .= ', TABLE_COLLATION AS collation ';

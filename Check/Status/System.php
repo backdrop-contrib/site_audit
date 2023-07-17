@@ -47,7 +47,7 @@ class SiteAuditCheckStatusSystem extends SiteAuditCheckAbstract {
       }
 
       // Reduce verbosity.
-      if (!drush_get_option('detail') && $requirement['severity'] < REQUIREMENT_WARNING) {
+      if (!$this->getOption('detail') && $requirement['severity'] < REQUIREMENT_WARNING) {
         continue;
       }
 
@@ -69,9 +69,9 @@ class SiteAuditCheckStatusSystem extends SiteAuditCheckAbstract {
         $class = 'error';
       }
 
-      if (drush_get_option('html') || drush_get_option('json')) {
+      if ($this->getOption('html') || $this->getOption('json')) {
         $value = isset($requirement['value']) && $requirement['value'] ? $requirement['value'] : '&nbsp;';
-        $uri = drush_get_context('DRUSH_URI');
+        $uri = url('', array('absolute' => TRUE));
         // Unknown URI - strip all links, but leave formatting.
         if ($uri == 'http://default') {
           $value = strip_tags($value, '<em><i><b><strong><span>');
@@ -87,7 +87,7 @@ class SiteAuditCheckStatusSystem extends SiteAuditCheckAbstract {
           'value' => $value,
           'class' => $class,
         );
-        if (drush_get_option('json')) {
+        if ($this->getOption('json')) {
           foreach ($item as $key => $value) {
             $item[$key] = strip_tags($value);
           }
@@ -103,7 +103,7 @@ class SiteAuditCheckStatusSystem extends SiteAuditCheckAbstract {
       }
       $items[] = $item;
     }
-    if (drush_get_option('html')) {
+    if ($this->getOption('html')) {
       $ret_val = '<table class="table table-condensed">';
       $ret_val .= '<thead><tr><th>' . dt('Title') . '</th><th>' . dt('Severity') . '</th><th>' . dt('Value') . '</th></thead>';
       $ret_val .= '<tbody>';
@@ -117,7 +117,7 @@ class SiteAuditCheckStatusSystem extends SiteAuditCheckAbstract {
       $ret_val .= '</tbody>';
       $ret_val .= '</table>';
     }
-    elseif (drush_get_option('json')) {
+    elseif ($this->getOption('json')) {
       foreach ($items as $item) {
         unset($item['class']);
         $ret_val[] = $item;

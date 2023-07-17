@@ -31,8 +31,8 @@ class SiteAuditCheckSecurityMenuRouter extends SiteAuditCheckAbstract {
       '@list' => implode(', ', array_keys($this->registry['menu_router'])),
     ));
 
-    if (drush_get_option('detail')) {
-      if (drush_get_option('html')) {
+    if ($this->getOption('detail')) {
+      if ($this->getOption('html')) {
         $ret_val .= '<br/>';
         $ret_val .= '<table class="table table-condensed">';
         $ret_val .= '<thead><tr><th>' . dt('Path') . '</th><th>' . dt('Reason') . '</th></thead>';
@@ -46,7 +46,7 @@ class SiteAuditCheckSecurityMenuRouter extends SiteAuditCheckAbstract {
       else {
         foreach ($this->registry['menu_router'] as $path => $reason) {
           $ret_val .= PHP_EOL;
-          if (!drush_get_option('json')) {
+          if (!$this->getOption('json')) {
             $ret_val .= str_repeat(' ', 6);
           }
           $ret_val .= '- ' . $path . ': ' . $reason;

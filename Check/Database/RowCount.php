@@ -15,7 +15,7 @@ class SiteAuditCheckDatabaseRowCount extends SiteAuditCheckAbstract {
    */
   public function getLabel() {
     return dt('Tables with at least @min_rows rows', array(
-      '@min_rows' => drush_get_option('min_rows', SiteAuditCheckDatabaseRowCount::AUDIT_CHECK_DB_ROW_MIN_DEFAULT),
+      '@min_rows' => $this->getOption('min_rows', SiteAuditCheckDatabaseRowCount::AUDIT_CHECK_DB_ROW_MIN_DEFAULT),
     ));
   }
 
@@ -24,7 +24,7 @@ class SiteAuditCheckDatabaseRowCount extends SiteAuditCheckAbstract {
    */
   public function getDescription() {
     return dt('Return list of all tables with at least @min_rows rows in the database.', array(
-      '@min_rows' => drush_get_option('min_rows', SiteAuditCheckDatabaseRowCount::AUDIT_CHECK_DB_ROW_MIN_DEFAULT),
+      '@min_rows' => $this->getOption('min_rows', SiteAuditCheckDatabaseRowCount::AUDIT_CHECK_DB_ROW_MIN_DEFAULT),
     ));
   }
 
@@ -39,10 +39,10 @@ class SiteAuditCheckDatabaseRowCount extends SiteAuditCheckAbstract {
   public function getResultInfo() {
     if (empty($this->registry['rows_by_table'])) {
       return dt('No tables with more than @min_rows rows.', array(
-        '@min_rows' => drush_get_option('min_rows', SiteAuditCheckDatabaseRowCount::AUDIT_CHECK_DB_ROW_MIN_DEFAULT),
+        '@min_rows' => $this->getOption('min_rows', SiteAuditCheckDatabaseRowCount::AUDIT_CHECK_DB_ROW_MIN_DEFAULT),
       ));
     }
-    if (drush_get_option('html')) {
+    if ($this->getOption('html')) {
       $ret_val = '<table class="table table-condensed">';
       $ret_val .= '<thead><tr><th>' . dt('Table Name') . '</th><th>' . dt('Rows') . '</th></tr></thead>';
       $ret_val .= '<tbody>';
@@ -57,13 +57,13 @@ class SiteAuditCheckDatabaseRowCount extends SiteAuditCheckAbstract {
     }
     else {
       $ret_val = dt('Table Name: Rows') . PHP_EOL;
-      if (!drush_get_option('json')) {
+      if (!$this->getOption('json')) {
         $ret_val .= str_repeat(' ', 4);
       }
       $ret_val .= '----------------';
       foreach ($this->registry['rows_by_table'] as $table_name => $rows) {
         $ret_val .= PHP_EOL;
-        if (!drush_get_option('json')) {
+        if (!$this->getOption('json')) {
           $ret_val .= str_repeat(' ', 4);
         }
         $ret_val .= "$table_name: $rows";
@@ -93,13 +93,7 @@ class SiteAuditCheckDatabaseRowCount extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    if (version_compare(DRUSH_VERSION, 7, '>=')) {
-      $sql = drush_sql_get_class();
-      $db_spec = $sql->db_spec();
-    }
-    else {
-      $db_spec = _drush_sql_get_db_spec();
-    }
+    $db_spec = Database::getConnectionInfo()['default'];
 
     $this->registry['rows_by_table'] = array();
     $warning = FALSE;
@@ -109,14 +103,14 @@ class SiteAuditCheckDatabaseRowCount extends SiteAuditCheckAbstract {
     $sql_query .= 'AND TABLE_ROWS >= :count ';
     $sql_query .= 'ORDER BY TABLE_ROWS desc ';
     $result = db_query($sql_query, array(
-      ':count' => drush_get_option('min_rows', SiteAuditCheckDatabaseRowCount::AUDIT_CHECK_DB_ROW_MIN_DEFAULT),
+      ':count' => $this->getOption('min_rows', SiteAuditCheckDatabaseRowCount::AUDIT_CHECK_DB_ROW_MIN_DEFAULT),
       ':dbname' => $db_spec['database'],
     ));
     foreach ($result as $row) {
-      if ($row->rows > drush_get_option('min_rows', SiteAuditCheckDatabaseRowCount::AUDIT_CHECK_DB_ROW_MIN_DEFAULT)) {
+      if ($row->table_rows > $this->getOption('min_rows', SiteAuditCheckDatabaseRowCount::AUDIT_CHECK_DB_ROW_MIN_DEFAULT)) {
         $warning = TRUE;
       }
-      $this->registry['rows_by_table'][$row->table_name] = $row->rows;
+      $this->registry['rows_by_table'][$row->table_name] = $row->table_rows;
     }
     if ($warning) {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_WARN;

@@ -64,7 +64,7 @@ class SiteAuditCheckBestPracticesMultisite extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    $drupal_root = drush_get_context('DRUSH_SELECTED_DRUPAL_ROOT');
+    $drupal_root = DRUPAL_ROOT;
     $handle = opendir($drupal_root . '/sites/');
     $this->registry['multisites'] = array();
     while (FALSE !== ($entry = readdir($handle))) {
@@ -85,7 +85,7 @@ class SiteAuditCheckBestPracticesMultisite extends SiteAuditCheckAbstract {
     }
     closedir($handle);
     if (!empty($this->registry['multisites'])) {
-      if (drush_get_option('vendor') == 'pantheon') {
+      if ($this->getOption('vendor') == 'pantheon') {
         return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL;
       }
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;

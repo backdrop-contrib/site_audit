@@ -56,10 +56,10 @@ class SiteAuditCheckCacheBackends extends SiteAuditCheckAbstract {
    */
   public function getAction() {
     if ($this->score == SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO) {
-      if (drush_get_option('vendor') == 'pantheon') {
+      if ($this->getOption('vendor') == 'pantheon') {
         return dt('Consider using a caching backend such as redis.');
       }
-      elseif (drush_get_option('vendor') == 'acquia') {
+      elseif ($this->getOption('vendor') == 'acquia') {
         return dt('Consider using a caching backend such as memcache.');
       }
       return dt('Consider using a caching backend such as redis or memcache.');

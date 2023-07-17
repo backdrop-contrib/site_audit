@@ -62,7 +62,7 @@ class SiteAuditCheckViewsCacheResults extends SiteAuditCheckAbstract {
   public function getAction() {
     if (!in_array($this->score, array(SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO, SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS))) {
       $ret_val = dt('Query results should be cached for at least 1 minute.');
-      if (drush_get_option('detail')) {
+      if ($this->getOption('detail')) {
         $steps = array(
           dt('Go to /admin/structure/views/'),
           dt('Edit the View in question'),
@@ -71,10 +71,10 @@ class SiteAuditCheckViewsCacheResults extends SiteAuditCheckAbstract {
           dt('Next to Caching, click to edit.'),
           dt('Query results: (something other than Never cache)'),
         );
-        if (drush_get_option('html')) {
+        if ($this->getOption('html')) {
           $ret_val .= '<ol><li>' . implode('</li><li>', $steps) . '</li></ol>';
         }
-        elseif (drush_get_option('json')) {
+        elseif ($this->getOption('json')) {
           $ret_val = array(
             'Summary' => $ret_val,
             'Steps' => $steps,
@@ -105,6 +105,13 @@ class SiteAuditCheckViewsCacheResults extends SiteAuditCheckAbstract {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
     }
 
+    $this->registry['views'] = array();
+    foreach (views_get_all_views() as $view) {
+      if ($view->disabled) {
+        continue;
+      }
+      $this->registry['views'][] = $view;
+    }
     $this->registry['results_lifespan'] = array();
     foreach ($this->registry['views'] as $view) {
       // Skip views used for administration purposes.
@@ -174,7 +181,7 @@ class SiteAuditCheckViewsCacheResults extends SiteAuditCheckAbstract {
           }
         }
         if ($all_default_displays) {
-          if ($view_data['default'] == 'none') {
+          if (!empty($view_data['default']) && $view_data['default'] == 'none') {
             $this->registry['views_without_results_caching'][] = $view_name;
           }
         }

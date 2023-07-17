@@ -37,7 +37,7 @@ class SiteAuditCheckContentFieldInstances extends SiteAuditCheckAbstract {
     }
 
     $ret_val = '';
-    if (drush_get_option('html') == TRUE) {
+    if ($this->getOption('html') == TRUE) {
       $ret_val .= '<table class="table table-condensed">';
       $ret_val .= '<tr><th>' . dt('Entity Type') . '</th><th>' . dt('Field Name') . '</th><th>' . dt('Bundle Name') . '</th><th>' . dt('Count') . '</th></tr>';
       foreach ($this->registry['field_instance_counts'] as $bundle_name => $entity_types) {
@@ -54,7 +54,7 @@ class SiteAuditCheckContentFieldInstances extends SiteAuditCheckAbstract {
       foreach ($this->registry['field_instance_counts'] as $bundle_name => $entity_types) {
         if ($rows++ > 0) {
           $ret_val .= PHP_EOL;
-          if (!drush_get_option('json')) {
+          if (!$this->getOption('json')) {
             $ret_val .= str_repeat(' ', 4);
           }
         }
@@ -63,7 +63,7 @@ class SiteAuditCheckContentFieldInstances extends SiteAuditCheckAbstract {
         ));
         foreach ($entity_types as $entity_type => $fields) {
           $ret_val .= PHP_EOL;
-          if (!drush_get_option('json')) {
+          if (!$this->getOption('json')) {
             $ret_val .= str_repeat(' ', 6);
           }
           $ret_val .= dt('Entity Type: !entity_type', array(
@@ -71,7 +71,7 @@ class SiteAuditCheckContentFieldInstances extends SiteAuditCheckAbstract {
           ));
           foreach ($fields as $field_name => $count) {
             $ret_val .= PHP_EOL;
-            if (!drush_get_option('json')) {
+            if (!$this->getOption('json')) {
               $ret_val .= str_repeat(' ', 8);
             }
             $ret_val .= "$field_name: $count";

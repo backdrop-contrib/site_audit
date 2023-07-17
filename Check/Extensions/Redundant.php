@@ -30,8 +30,8 @@ class SiteAuditCheckExtensionsRedundant extends SiteAuditCheckAbstract {
     $ret_val = dt('The following redundant modules(s) currently exist in your codebase: @list', array(
       '@list' => implode(', ', array_keys($this->registry['extensions_redundant'])),
     ));
-    if (drush_get_option('detail')) {
-      if (drush_get_option('html')) {
+    if ($this->getOption('detail')) {
+      if ($this->getOption('html')) {
         $ret_val .= '<br/>';
         $ret_val .= '<table class="table table-condensed">';
         $ret_val .= '<thead><tr><th>' . dt('Name') . '</th><th>' . dt('Reason') . '</th></thead>';
@@ -45,7 +45,7 @@ class SiteAuditCheckExtensionsRedundant extends SiteAuditCheckAbstract {
       else {
         foreach ($this->registry['extensions_redundant'] as $row) {
           $ret_val .= PHP_EOL;
-          if (!drush_get_option('json')) {
+          if (!$this->getOption('json')) {
             $ret_val .= str_repeat(' ', 6);
           }
           $ret_val .= '- ' . $row[0] . ': ' . $row[1];
@@ -87,7 +87,9 @@ class SiteAuditCheckExtensionsRedundant extends SiteAuditCheckAbstract {
   public function calculateScore() {
     $this->registry['extensions_redundant'] = array();
     $extension_info = $this->registry['extensions'];
-    uasort($extension_info, '_drush_pm_sort_extensions');
+    if (empty($extension_info)) {
+      return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
+    }
     $redundant_extensions = $this->getExtensions();
 
     foreach ($extension_info as $extension) {

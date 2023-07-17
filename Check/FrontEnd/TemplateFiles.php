@@ -45,7 +45,7 @@ class SiteAuditCheckFrontEndTemplateFiles extends SiteAuditCheckAbstract {
    */
   public function getResultWarn() {
     $ret_val = '';
-    if (drush_get_option('html') == TRUE) {
+    if ($this->getOption('html') == TRUE) {
       $ret_val .= '<table class="table table-condensed">';
       $ret_val .= '<thead><tr><th>' . dt('Line') . '</th><th>' . dt('Code') . '</th></tr></thead>';
       foreach ($this->registry['template_logic'] as $filename => $violations) {
@@ -61,7 +61,7 @@ class SiteAuditCheckFrontEndTemplateFiles extends SiteAuditCheckAbstract {
       foreach ($this->registry['template_logic'] as $filename => $violations) {
         if ($rows++ > 0) {
           $ret_val .= PHP_EOL;
-          if (!drush_get_option('json')) {
+          if (!$this->getOption('json')) {
             $ret_val .= str_repeat(' ', 4);
           }
         }
@@ -71,7 +71,7 @@ class SiteAuditCheckFrontEndTemplateFiles extends SiteAuditCheckAbstract {
         ));
         foreach ($violations as $violation) {
           $ret_val .= PHP_EOL;
-          if (!drush_get_option('json')) {
+          if (!$this->getOption('json')) {
             $ret_val .= str_repeat(' ', 6);
           }
           $ret_val .= 'Line ' . $violation[0] . ' : ' . $violation[1];
@@ -95,7 +95,7 @@ class SiteAuditCheckFrontEndTemplateFiles extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    $theme_path = drush_get_context('DRUSH_SELECTED_DRUPAL_ROOT') . '/' . path_to_theme();
+    $theme_path = DRUPAL_ROOT . '/' . path_to_theme();
     $command = 'find ' . $theme_path . ' -iname "*.tpl.php" ';
     $command .= '-exec grep -n -H "db_select\|db_query\|mysql_query\|drupal_goto\|new .*(\|drupal_set_message\|drupal_get_messages\|cache_clear_all\|function .*(\|exit\|die\|arg(" {} \;';
     $output = array();

@@ -296,4 +296,36 @@ abstract class SiteAuditCheckAbstract {
     return $filename;
   }
 
+  /**
+   * drush_get_option if running with drush. Sane defaults when called in Drupal.
+   */
+  static public function getOption($name, $default = null) {
+    return SiteAuditReportAbstract::getOption($name, $default);
+  }
+
+  /**
+   * Returns an array of getOptions consumed by the drush commands and the web ui.
+   * @return array[]
+   */
+  static public function getOptions() {
+    return array(
+      'html' => array(
+        'description' => dt('If set, render as HTML report.'),
+      ),
+      'json' => array(
+        'description' => dt('If set, render as JSON report.'),
+      ),
+      'detail' => array(
+        'description' => dt('If set, provided detailed responses.'),
+      ),
+      'skip' => array(
+        'description' => dt('Name(s) of reports or specific checks to skip, comma separated.'),
+        'example-value' => dt('insights,ExtensionsDev'),
+        'value' => 'required',
+      ),
+      'bootstrap' => array(
+        'description' => dt('If enabled, will wrap the generated report with Twitter Bootstrap 3.0 inline HTML.'),
+      ),
+    );
+  }
 }

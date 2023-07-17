@@ -15,10 +15,9 @@ if (version_compare(phpversion(), '5.3.0') < 0) {
 }
 
 // Includes.
-define('SITE_AUDIT_BASE_PATH', __DIR__);
-require_once SITE_AUDIT_BASE_PATH . '/site_audit.autoload.inc';
-require_once SITE_AUDIT_BASE_PATH . '/Report/Abstract.php';
-require_once SITE_AUDIT_BASE_PATH . '/Check/Abstract.php';
+require_once 'site_audit.autoload.inc';
+require_once 'Report/Abstract.php';
+require_once 'Check/Abstract.php';
 
 /**
  * Get common command options used by all site_audit commands.
@@ -27,25 +26,7 @@ require_once SITE_AUDIT_BASE_PATH . '/Check/Abstract.php';
  *   Associative array of common command options.
  */
 function site_audit_common_options() {
-  return array(
-    'html' => array(
-      'description' => dt('If set, render as HTML report.'),
-    ),
-    'json' => array(
-      'description' => dt('If set, render as JSON report.'),
-    ),
-    'detail' => array(
-      'description' => dt('If set, provided detailed responses.'),
-    ),
-    'skip' => array(
-      'description' => dt('Name(s) of reports or specific checks to skip, comma separated.'),
-      'example-value' => dt('insights,ExtensionsDev'),
-      'value' => 'required',
-    ),
-    'bootstrap' => array(
-      'description' => dt('If enabled, will wrap the generated report with Twitter Bootstrap 3.0 inline HTML.'),
-    ),
-  );
+  return SiteAuditCheckAbstract::getOptions();
 }
 
 /**
@@ -495,21 +476,6 @@ function drush_site_audit_audit_all($url = '', $key = '') {
     echo json_encode($report_all);
     return;
   }
-}
-
-/**
- * Determine if in a development environment.
- *
- * @return bool
- *   Whether site is in a development environment.
- */
-function site_audit_env_is_dev() {
-  // Pantheon.
-  if (drush_get_option('vendor') == 'pantheon') {
-    return (defined('PANTHEON_ENVIRONMENT') && !in_array(PANTHEON_ENVIRONMENT, array('test', 'live')));
-  }
-  // Your host could be here! Submit an issue and/or a patch.
-  return FALSE;
 }
 
 /**

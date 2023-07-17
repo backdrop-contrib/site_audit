@@ -35,21 +35,21 @@ class SiteAuditCheckContentContentTypes extends SiteAuditCheckAbstract {
     $ret_val = '';
 
     if (empty($this->registry['content_type_counts'])) {
-      if (drush_get_option('detail')) {
+      if ($this->getOption('detail')) {
         return dt('No nodes exist.');
       }
       return $ret_val;
     }
 
     $ret_val .= "Total: {$this->registry['node_count']} nodes";
-    if (drush_get_option('html') == TRUE) {
+    if ($this->getOption('html') == TRUE) {
       $ret_val = "<p>$ret_val</p>";
     }
     else {
       $ret_val .= PHP_EOL;
     }
 
-    if (drush_get_option('html') == TRUE) {
+    if ($this->getOption('html') == TRUE) {
       $ret_val .= '<table class="table table-condensed">';
       $ret_val .= '<thead><tr><th>' . dt('Content Type') . '</th><th>' . dt('Node Count') . '</th></tr></thead>';
       foreach ($this->registry['content_type_counts'] as $content_type => $count) {
@@ -58,13 +58,13 @@ class SiteAuditCheckContentContentTypes extends SiteAuditCheckAbstract {
       $ret_val .= '</table>';
     }
     else {
-      if (!drush_get_option('json')) {
+      if (!$this->getOption('json')) {
         $ret_val .= str_repeat(' ', 4);
       }
       $ret_val .= '-------------------';
       foreach ($this->registry['content_type_counts'] as $content_type => $count) {
         $ret_val .= PHP_EOL;
-        if (!drush_get_option('json')) {
+        if (!$this->getOption('json')) {
           $ret_val .= str_repeat(' ', 4);
         }
         $ret_val .= $content_type . ': ' . $count;

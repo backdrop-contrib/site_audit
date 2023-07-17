@@ -63,9 +63,9 @@ class SiteAuditCheckExtensionsDisabled extends SiteAuditCheckAbstract {
    */
   public function calculateScore() {
     $this->registry['extensions_disabled'] = array();
-
+    $this->registry['extensions'] = system_rebuild_module_data();
     foreach ($this->registry['extensions'] as $extension) {
-      if (($extension->type == 'module') && (drush_get_extension_status($extension) == 'disabled')) {
+      if ($extension->type == 'module' && $extension->status == 0 && $extension->schema_version != -1) {
         $this->registry['extensions_disabled'][] = $extension->name;
       }
     }

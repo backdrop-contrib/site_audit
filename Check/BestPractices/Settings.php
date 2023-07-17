@@ -67,7 +67,7 @@ class SiteAuditCheckBestPracticesSettings extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    $drupal_root = drush_get_context('DRUSH_SELECTED_DRUPAL_ROOT');
+    $drupal_root = DRUPAL_ROOT;
     if (file_exists($drupal_root . '/sites/default/settings.php')) {
       if (is_link($drupal_root . '/sites/default/settings.php')) {
         return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_WARN;

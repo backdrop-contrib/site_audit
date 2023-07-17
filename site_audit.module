@@ -1,0 +1,243 @@
+<?php
+
+require_once 'site_audit.autoload.inc';
+require_once 'Report/Abstract.php';
+require_once 'Check/Abstract.php';
+
+/**
+ * Implements hook_menu().
+ *
+ * @return array
+ */
+function site_audit_menu() {
+  $items['admin/reports/site-audit'] = [
+    'title' => 'Site Audit',
+    'description' => 'View the site audit report for this site.',
+    'page callback' => 'site_audit_report',
+    'access arguments' => ['administer site configuration'],
+    'type' => MENU_NORMAL_ITEM,
+  ];
+  $items['admin/reports/site-audit/view'] = [
+    'title' => 'Report',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  ];
+  $items['admin/reports/site-audit/configuration'] = [
+    'title' => 'Settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['site_audit_settings_form'],
+    'access arguments' => ['administer site configuration'],
+    'type' => MENU_LOCAL_TASK,
+  ];
+  return $items;
+}
+
+/**
+ * Renders Site Audit Settings form.
+ * @param $form
+ * @param $form_state
+ * @return array
+ */
+function site_audit_settings_form($form, &$form_state) {
+  drupal_set_title(t('Site Audit Settings'));
+  $reports = site_audit_get_web_reports();
+  $form['site_audit_reports'] = [
+    '#title' => t('Site Audit Reports'),
+    '#description' => t('Select the reports to show on the Site Audit Report page. If none are selected, all reports will be included.'),
+    '#type' => 'select',
+    '#multiple' => TRUE,
+    '#options' => $reports,
+    '#default_value' => variable_get('site_audit_reports', []),
+  ];
+
+  $form['site_audit_pagespeed_url'] = array(
+    '#title' => t('Google Pagespeed Test URL'),
+    '#description' => t("To receive reports from Google's PageSpeed service, enter a URL to test here. To skip reporting, leave this blank. WARNING: This will greatly increase the time to generate the report."),
+    '#type' => 'textfield',
+    '#default_value' => variable_get('site_audit_pagespeed_url', url('', array('absolute' => true))),
+  );
+  $form['site_audit_pagespeed_api_key'] = array(
+    '#title' => t('Google Pagespeed API Key'),
+    '#description' => t("To receive reports from Google's PageSpeed service, enter an API key here. See !link for more information.", array(
+      '!link' => l('https://developers.google.com/speed/docs/insights/v1/getting_started#auth', 'https://developers.google.com/speed/docs/insights/v1/getting_started#auth'),
+    )),
+    '#type' => 'textfield',
+    '#default_value' => variable_get('site_audit_pagespeed_api_key', []),
+  );
+
+  return system_settings_form($form);
+}
+
+function site_audit_get_web_reports() {
+  $reports = file_scan_directory(__dir__ . '/Report', '/\.php/');
+  $supported_reports = [];
+  $invalid_reports = [
+    'Abstract'
+  ];
+  foreach ($reports as $report_class) {
+    if ($report_class->name && !in_array($report_class->name, $invalid_reports)) {
+      $supported_reports[$report_class->name] = $report_class->name;
+    }
+  }
+  return $supported_reports;
+}
+
+/**
+ * Menu callback for the report page UI.
+ *
+ * @return array
+ */
+function site_audit_report() {
+  $output = [];
+  $reports = variable_get('site_audit_reports') ?: site_audit_get_web_reports();
+
+  foreach ($reports as $report_class) {
+    $class_name = "SiteAuditReport" . $report_class;
+    $output['reports']['#items'][] = "$class_name Report";
+    $report = new $class_name();
+    $output[$report_class] = [
+      '#markup' => $report->toHtml()
+    ];
+  }
+
+  return $output;
+}
+
+// We've tried to convert drush only reports to web based reports without altering the original report classes, by wrapping
+// the drush functions used and mirroring the expect return values.
+
+if (!function_exists('dt')) {
+  function dt($text, $args = [], $options = []) {
+    return t($text, $args, $options);
+  }
+}
+//
+//if (!function_exists('drush_get_option')) {
+//  function drush_get_option($key, $default = NULL ) {
+//    switch ($key) {
+//      case 'html':
+//      case 'detail':
+//        return TRUE;
+//      case 'json':
+//      case 'skip':
+//      case 'bootstrap':
+//      case 'vendor':
+//      case 'extension_count':
+//      case 'impact':
+//      case 'limit':
+//      case 'min_rows':
+//      default :
+//        return FALSE;
+//    }
+//  }
+//}
+//
+//if (!function_exists('drush_get_commands')) {
+//  function drush_get_commands() {
+//    $commands = [];
+//    // TODO: Generate these by scanning the Check directory.
+//    $commands['audit_best_practices']['checks'] = ['Multisite', 'Settings', 'SitesDefault', 'SitesAll', 'SitesSuperfluous', 'Fast404', 'PhpFilter'];
+//    $commands['audit_block']['checks'] = ['Enabled', 'Cache', 'CacheReport'];
+//    $commands['audit_cache']['checks'] = ['Anon', 'Lifetime', 'PageExpire', 'PageCompression', 'PreprocessCss', 'PreprocessJs', 'Lock', 'Backends', 'DefaultClass', 'Bins'];
+//    $commands['audit_codebase']['checks'] = ['SizeFiles', 'SizeAll', 'ManagedFileCount', 'ManagedFileSize'];
+//    $commands['audit_content']['checks'] = ['ContentTypes', 'ContentTypesUnused', 'DuplicateTitles', 'Vocabularies', 'VocabulariesUnused', 'FieldEnabled', 'FieldCount', 'FieldInstances', 'FieldsUnused'];
+//    $commands['audit_cron']['checks'] = ['Enabled', 'Running', 'Last'];
+//    $commands['audit_database']['checks'] = ['Size', 'RowCount', 'Collation', 'Engine'];
+//    $commands['audit_extensions']['checks'] = ['Count', 'Dev', 'Unrecommended', 'Redundant', 'Duplicate', 'Missing', 'Disabled', 'Update', 'Security'];
+//    $commands['audit_insights']['checks'] = ['Analyze'];
+//    $commands['audit_security']['checks'] = ['MenuRouter'];
+//    $commands['audit_status']['checks'] = ['System'];
+//    $commands['audit_users']['checks'] = ['CountAll', 'CountBlocked', 'WhoIsNumberOne', 'BlockedNumberOne'];
+//    $commands['audit_views']['checks'] = ['Enabled', 'Count', 'CacheResults', 'CacheOutput'];
+//    $commands['audit_watchdog']['checks'] = ['Syslog', 'Enabled', 'Count', 'Age', '404', 'Php'];
+//    return $commands;
+//  }
+//}
+//
+//if (!defined('DRUSH_COMMAND') && !function_exists('drush_get_extensions')) {
+//  function drush_get_extensions($include_core = FALSE) {
+//    $enabledModules = module_list();
+//    $enabledThemes = list_themes();
+//    $enabledExtensions = array_merge($enabledModules, $enabledThemes);
+//    return $enabledExtensions;
+//  }
+//}
+//
+//if (!defined('DRUSH_COMMAND') && !function_exists('drush_get_extension_status')) {
+//  function drush_get_extension_status($extension) {
+//    return module_exists($extension) ? 'enabled' : 'disabled';
+//  }
+//}
+//if (!defined('DRUSH_COMMAND') && !function_exists('drush_parse_command')) {
+//  function drush_parse_command() {
+//    return ['command' => 'audit_all'];
+//  }
+//}
+//
+//if (!defined('DRUSH_COMMAND') && !function_exists('drush_command_invoke_all_ref')) {
+//  function drush_command_invoke_all_ref($hook, &$ref = NULL) {
+//    return [];
+//  }
+//}
+//
+//if (!defined('DRUSH_COMMAND') && !function_exists('drush_set_error')) {
+//  function drush_set_error($message, $type = NULL) {
+//    drupal_set_message($message);
+//  }
+//}
+//
+//if (!defined('DRUSH_COMMAND') && !function_exists('drush_get_context')) {
+//  function drush_get_context($var) {
+//    return __DIR__;
+//  }
+//}
+//
+//if (!defined('DRUSH_COMMAND') && !function_exists('drush_invoke_process')) {
+//  function drush_invoke_process() {
+//    return [];
+//  }
+//}
+//
+//if (!defined('DRUSH_COMMAND') && !function_exists('site_audit_env_is_dev')) {
+//  function site_audit_env_is_dev() {
+//    return FALSE;
+//  }
+//}
+//
+//if (!defined('DRUSH_COMMAND') && !function_exists('core_watchdog_query')) {
+//  function core_watchdog_query() {
+//    return FALSE;
+//  }
+//}
+//
+//if (!defined('DRUSH_COMMAND') && !function_exists('drush_db_select')) {
+//  function drush_db_select() {
+//    return FALSE;
+//  }
+//}
+//
+//if (!defined('DRUSH_COMMAND') && !function_exists('drush_db_fetch_object')) {
+//  function drush_db_fetch_object() {
+//    return FALSE;
+//  }
+//}
+//
+//if (!!defined('DRUSH_COMMAND') && !function_exists('_drush_sql_get_db_spec')) {
+//  function _drush_sql_get_db_spec() {
+//    return FALSE;
+//  }
+//}
+
+/**
+ * Determine if in a development environment.
+ *
+ * @todo This only ever worked on pantheon. Let's deprecate it.
+ *
+ * @deprecated
+ * @return bool
+ *   Whether site is in a development environment.
+ */
+function site_audit_env_is_dev() {
+  return FALSE;
+}
+
+

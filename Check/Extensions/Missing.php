@@ -63,7 +63,7 @@ class SiteAuditCheckExtensionsMissing extends SiteAuditCheckAbstract {
    */
   public function calculateScore() {
     $this->registry['extensions_missing'] = array();
-    $drupal_root = drush_get_context('DRUSH_SELECTED_DRUPAL_ROOT');
+    $drupal_root = DRUPAL_ROOT;
 
     $result = db_select('system')->fields('system', array(
       'name',
