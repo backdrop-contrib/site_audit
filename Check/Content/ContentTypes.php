@@ -94,32 +94,32 @@ class SiteAuditCheckContentContentTypes extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    $sql_query  = 'SELECT COUNT({node}.nid) AS count, {node_type}.type ';
-    $sql_query .= 'FROM {node_type} ';
-    $sql_query .= 'LEFT JOIN {node} ON {node}.type = {node_type}.type ';
-    $sql_query .= 'GROUP BY {node_type}.type ';
-    $sql_query .= 'ORDER BY count DESC ';
+    $content_types = config_get('node.type');
 
-    $result = db_query($sql_query);
-
-    $this->registry['content_type_counts'] = $this->registry['content_types_unused'] = array();
+    $this->registry['content_type_counts'] = $this->registry['content_types_unused'] = [];
     $this->registry['node_count'] = 0;
 
-    foreach ($result as $row) {
-      if ($row->count == 0) {
-        $this->registry['content_types_unused'][] = $row->type;
+    foreach ($content_types as $type => $type_info) {
+      // Assuming you're only interested in published nodes, adjust the path accordingly if needed.
+      $nodes = config_get('node.type.' . $type . '.path', 'published');
+
+      $count = count($nodes);
+      if ($count == 0) {
+        $this->registry['content_types_unused'][] = $type;
       }
-      $this->registry['content_type_counts'][$row->type] = $row->count;
-      $this->registry['node_count'] += $row->count;
+
+      $this->registry['content_type_counts'][$type] = $count;
+      $this->registry['node_count'] += $count;
     }
 
     // Check to see if no nodes exist.
     $content_type_counts = array_count_values($this->registry['content_type_counts']);
     if (count($content_type_counts) == 1 && isset($content_type_counts[0]) && $content_type_counts[0] > 0) {
-      $this->registry['content_type_counts'] = array();
+      $this->registry['content_type_counts'] = [];
     }
 
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
   }
+
 
 }

@@ -58,24 +58,22 @@ class SiteAuditCheckRolesRolesList extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    $sql_query  = 'SELECT name';
-    $sql_query .= ', COUNT(uid) AS count_users ';
-    $sql_query .= 'FROM {role} ';
-    $sql_query .= 'LEFT JOIN {users_roles} ON {role}.rid = {users_roles}.rid ';
-    $sql_query .= 'GROUP BY {role}.rid ';
-    $sql_query .= 'ORDER BY name ASC ';
-    $result = db_query($sql_query);
-    foreach ($result as $row) {
-      if ($row->name === 'authenticated user') {
-        $sql_query = 'SELECT COUNT(uid) AS count from {users}';
-        $count = db_query($sql_query)->fetchField();
-        $this->registry['roles'][$row->name] = $count;
-      }
-      else {
-        $this->registry['roles'][$row->name] = $row->count_users;
+    $roles = config_get('user.role');
+
+    $this->registry['roles'] = [];
+
+    foreach ($roles as $rid => $role) {
+      if ($role['name'] === 'authenticated user') {
+        $count = user_count_users();
+        $this->registry['roles'][$role['name']] = $count;
+      } else {
+        $count = db_query('SELECT COUNT(uid) FROM {users_roles} WHERE rid = :rid', [':rid' => $rid])->fetchField();
+        $this->registry['roles'][$role['name']] = $count;
       }
     }
+
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
   }
+
 
 }

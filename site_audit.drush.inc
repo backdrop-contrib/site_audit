@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Drupal site auditing commands.
+ * Backdrop site auditing commands.
  */
 
 // Avoid loading multiple versions of site_audit.
@@ -49,7 +49,7 @@ function site_audit_drush_command() {
   $items['audit_best_practices'] = array(
     'description' => dt('Audit best practices used.'),
     'aliases' => array('abp'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'options' => array_merge(site_audit_common_options(), $vendor_options),
     'checks' => array(
       'Multisite',
@@ -65,7 +65,7 @@ function site_audit_drush_command() {
   $items['audit_block'] = array(
     'description' => dt('Audit Block.'),
     'aliases' => array('ab'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'options' => site_audit_common_options(),
     'checks' => array(
       'Enabled',
@@ -75,9 +75,9 @@ function site_audit_drush_command() {
   );
 
   $items['audit_cache'] = array(
-    'description' => dt('Audit Drupal\'s caching settings.'),
+    'description' => dt('Audit Backdrop\'s caching settings.'),
     'aliases' => array('ac'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'options' => array_merge(site_audit_common_options(), $vendor_options),
     'checks' => array(
       'Anon',
@@ -96,7 +96,7 @@ function site_audit_drush_command() {
   $items['audit_codebase'] = array(
     'description' => dt('Audit the codebase.'),
     'aliases' => array('acb'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'options' => site_audit_common_options(),
     'checks' => array(
       'SizeFiles',
@@ -109,7 +109,7 @@ function site_audit_drush_command() {
   $items['audit_content'] = array(
     'description' => dt('Audit content.'),
     'aliases' => array('acn'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'options' => site_audit_common_options(),
     'checks' => array(
       'ContentTypes',
@@ -127,7 +127,7 @@ function site_audit_drush_command() {
   $items['audit_cron'] = array(
     'description' => dt('Audit cron.'),
     'aliases' => array('acr'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'options' => site_audit_common_options(),
     'checks' => array(
       'Enabled',
@@ -147,7 +147,7 @@ function site_audit_drush_command() {
   $items['audit_database'] = array(
     'description' => dt('Report information about a site environment\'s database.'),
     'aliases' => array('ad'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'options' => array_merge(site_audit_common_options(), $options_db),
     'checks' => array(
       'Size',
@@ -160,7 +160,7 @@ function site_audit_drush_command() {
   $items['audit_extensions'] = array(
     'description' => dt('Audit extensions (modules and themes).'),
     'aliases' => array('ae'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'options' => array_merge(site_audit_common_options(), $vendor_options),
     'checks' => array(
       'Count',
@@ -201,7 +201,7 @@ function site_audit_drush_command() {
   $items['audit_insights'] = array(
     'description' => dt('Analyze a site using Google PageSpeed Insights.'),
     'aliases' => array('agi'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'arguments' => $arguments_gi,
     'options' => array_merge(site_audit_common_options(), $options_gi),
     'checks' => array(
@@ -212,7 +212,7 @@ function site_audit_drush_command() {
   $items['audit_front_end'] = array(
     'description' => dt("Analyze a site's front end performance."),
     'aliases' => array('afe'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'options' => site_audit_common_options(),
     'checks' => array(
       'TemplateFiles',
@@ -222,7 +222,7 @@ function site_audit_drush_command() {
   $items['audit_security'] = array(
     'description' => dt('Audit the site for known security vulnerabilities.'),
     'aliases' => array('asec'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'options' => site_audit_common_options(),
     'checks' => array(
       'MenuRouter',
@@ -230,9 +230,9 @@ function site_audit_drush_command() {
   );
 
   $items['audit_status'] = array(
-    'description' => dt('Audit Drupal\'s built-in status report.'),
+    'description' => dt('Audit Backdrop\'s built-in status report.'),
     'aliases' => array('as'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'options' => site_audit_common_options(),
     'checks' => array(
       'System',
@@ -242,7 +242,7 @@ function site_audit_drush_command() {
   $items['audit_users'] = array(
     'description' => dt('Audit Users.'),
     'aliases' => array('au'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'options' => site_audit_common_options(),
     'checks' => array(
       'CountAll',
@@ -255,7 +255,7 @@ function site_audit_drush_command() {
   $items['audit_roles'] = array(
     'description' => dt('Audit Roles.'),
     'aliases' => array('ar'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'options' => site_audit_common_options(),
     'checks' => array(
       'RolesList',
@@ -266,7 +266,7 @@ function site_audit_drush_command() {
   $items['audit_views'] = array(
     'description' => dt('Audit Views.'),
     'aliases' => array('av'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'options' => site_audit_common_options(),
     'checks' => array(
       'Enabled',
@@ -279,7 +279,7 @@ function site_audit_drush_command() {
   $items['audit_watchdog'] = array(
     'description' => dt('Audit the database logs.'),
     'aliases' => array('aw'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'options' => array_merge(site_audit_common_options(), $vendor_options),
     'checks' => array(
       'Syslog',
@@ -296,7 +296,7 @@ function site_audit_drush_command() {
   $items['audit_all'] = array(
     'description' => dt('Executes every Site Audit Report'),
     'aliases' => array('aa'),
-    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
+    'bootstrap' => DRUSH_BOOTSTRAP_BACKDROP_FULL,
     'arguments' => $arguments_all,
     'options' => $options_all,
     'reports' => array(
@@ -332,7 +332,7 @@ function site_audit_drush_command() {
 function site_audit_drush_help($section) {
   switch ($section) {
     case 'meta:site_audit:title':
-      return dt('Tools for auditing a Drupal site');
+      return dt('Tools for auditing a Backdrop site');
 
   }
 }
@@ -479,15 +479,15 @@ function drush_site_audit_audit_all($url = '', $key = '') {
 }
 
 /**
- * Check the Drupal major version.
+ * Check the Backdrop major version.
  *
  * @return bool
  *   FALSE if unsupported.
  */
 function site_audit_version_check() {
-  $drupal_major_version = drush_drupal_major_version();
-  if ($drupal_major_version < 7 || $drupal_major_version >= 8) {
-    return drush_set_error('SITE_AUDIT_DRUPAL_7_ONLY', dt('This version of Site Audit only supports Drupal 7.'));
+  $backdrop_major_version = drush_backdrop_major_version();
+  if ($backdrop_major_version < 7 || $backdrop_major_version >= 8) {
+    return drush_set_error('SITE_AUDIT_BACKDROP_7_ONLY', dt('This version of Site Audit only supports Backdrop 7.'));
   }
   return TRUE;
 }
@@ -500,7 +500,7 @@ function drush_site_audit_audit_cache_validate() {
 }
 
 /**
- * Check Drupal's caching settings and make recommendations as necessary.
+ * Check Backdrop's caching settings and make recommendations as necessary.
  */
 function drush_site_audit_audit_cache() {
   $report = new SiteAuditReportCache();
@@ -515,7 +515,7 @@ function drush_site_audit_audit_content_validate() {
 }
 
 /**
- * Audit Drupal's content.
+ * Audit Backdrop's content.
  */
 function drush_site_audit_audit_content() {
   $report = new SiteAuditReportContent();
@@ -530,7 +530,7 @@ function drush_site_audit_audit_database_validate() {
 }
 
 /**
- * Audit the database associated with a Drupal site.
+ * Audit the database associated with a Backdrop site.
  */
 function drush_site_audit_audit_database() {
   $report = new SiteAuditReportDatabase();
@@ -551,7 +551,7 @@ function drush_site_audit_audit_extensions_validate() {
 }
 
 /**
- * Audit modules and themes (extensions) for a given Drupal site.
+ * Audit modules and themes (extensions) for a given Backdrop site.
  */
 function drush_site_audit_audit_extensions() {
   $report = new SiteAuditReportExtensions();
@@ -566,7 +566,7 @@ function drush_site_audit_audit_codebase_validate() {
 }
 
 /**
- * Audit the executable codebase of a Drupal site.
+ * Audit the executable codebase of a Backdrop site.
  */
 function drush_site_audit_audit_codebase() {
   $report = new SiteAuditReportCodebase();
@@ -581,7 +581,7 @@ function drush_site_audit_audit_watchdog_validate() {
 }
 
 /**
- * Audit the database logs of a Drupal site.
+ * Audit the database logs of a Backdrop site.
  */
 function drush_site_audit_audit_watchdog() {
   $report = new SiteAuditReportWatchdog();
@@ -596,7 +596,7 @@ function drush_site_audit_audit_best_practices_validate() {
 }
 
 /**
- * Audit Drupal best practices.
+ * Audit Backdrop best practices.
  */
 function drush_site_audit_audit_best_practices() {
   $report = new SiteAuditReportBestPractices();

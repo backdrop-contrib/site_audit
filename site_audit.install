@@ -1,0 +1,31 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the site_audit module.
+ *
+ */
+
+
+/**
+ * Migrate site_audit variables to config.
+ */
+function site_audit_update_1000() {
+  $config = config('site_audit.settings');
+  $config->set('site_audit_reports', update_variable_get('site_audit_reports', ''));
+  $config->set('site_audit_pagespeed_url', update_variable_get('site_audit_pagespeed_url', 'dynamic value in file /site_audit/site_audit.module line 56'));
+  $config->set('site_audit_pagespeed_api_key', update_variable_get('site_audit_pagespeed_api_key', 'dynamic value in file /site_audit/site_audit.module line 64'));
+  $config->save();
+
+  update_variable_del('site_audit_reports');
+  update_variable_del('site_audit_pagespeed_url');
+  update_variable_del('site_audit_pagespeed_api_key');
+}
+
+/**
+ * Implements hook_install().
+ */
+function site_audit_install() {
+  // Dynamically generated variable data was detected.
+  // /site_audit/site_audit.module line 56
+  // /site_audit/site_audit.module line 64
+}

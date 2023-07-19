@@ -89,35 +89,32 @@ class SiteAuditCheckContentVocabularies extends SiteAuditCheckAbstract {
    */
   public function calculateScore() {
     if (!module_exists('taxonomy')) {
-      $this->abort = TRUE;
+      $this->abort = true;
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
     }
-    $sql_query  = 'SELECT COUNT(tid) AS count, {taxonomy_vocabulary}.name AS name ';
-    $sql_query .= 'FROM {taxonomy_vocabulary} ';
-    $sql_query .= 'LEFT JOIN {taxonomy_term_data} ON {taxonomy_vocabulary}.vid = {taxonomy_term_data}.vid ';
-    $sql_query .= 'GROUP BY {taxonomy_vocabulary}.name ';
-    $sql_query .= 'ORDER BY count DESC ';
 
-    $result = db_query($sql_query);
+    $vocabularies = config_get('taxonomy.vocabulary');
 
-    $this->registry['vocabulary_counts'] = $this->registry['vocabulary_unused'] = array();
+    $this->registry['vocabulary_counts'] = $this->registry['vocabulary_unused'] = [];
 
-    foreach ($result as $row) {
-      if ($row->count == 0) {
-        $this->registry['vocabulary_unused'][] = $row->name;
-      }
-      elseif (!$this->getOption('detail')) {
+    foreach ($vocabularies as $vid => $vocabulary) {
+      $terms = config_get('taxonomy.vocabulary.' . $vid . '.terms');
+
+      $count = count($terms);
+      if ($count == 0) {
+        $this->registry['vocabulary_unused'][] = $vocabulary['name'];
+      } elseif (!$this->getOption('detail')) {
         continue;
       }
-      $this->registry['vocabulary_counts'][$row->name] = $row->count;
+
+      $this->registry['vocabulary_counts'][$vocabulary['name']] = $count;
     }
 
     // No need to check for unused vocabularies if there aren't any.
     if (empty($this->registry['vocabulary_counts'])) {
-      $this->abort = TRUE;
+      $this->abort = true;
     }
 
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
   }
-
 }

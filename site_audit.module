@@ -23,12 +23,23 @@ function site_audit_menu() {
   ];
   $items['admin/reports/site-audit/configuration'] = [
     'title' => 'Settings',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => ['site_audit_settings_form'],
     'access arguments' => ['administer site configuration'],
     'type' => MENU_LOCAL_TASK,
   ];
   return $items;
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function site_audit_config_info() {
+  $prefixes['site_audit.settings'] = array(
+    'label' => t('Site Audit settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
 }
 
 /**
@@ -38,22 +49,24 @@ function site_audit_menu() {
  * @return array
  */
 function site_audit_settings_form($form, &$form_state) {
-  drupal_set_title(t('Site Audit Settings'));
+  $config = config('site_audit.settings');
+  backdrop_set_title(t('Site Audit Settings'));
   $reports = site_audit_get_web_reports();
+  $form['#config'] = 'site_audit.settings';
   $form['site_audit_reports'] = [
     '#title' => t('Site Audit Reports'),
     '#description' => t('Select the reports to show on the Site Audit Report page. If none are selected, all reports will be included.'),
     '#type' => 'select',
     '#multiple' => TRUE,
     '#options' => $reports,
-    '#default_value' => variable_get('site_audit_reports', []),
+    '#default_value' => $config->get('site_audit_reports'),
   ];
 
   $form['site_audit_pagespeed_url'] = array(
     '#title' => t('Google Pagespeed Test URL'),
     '#description' => t("To receive reports from Google's PageSpeed service, enter a URL to test here. To skip reporting, leave this blank. WARNING: This will greatly increase the time to generate the report."),
     '#type' => 'textfield',
-    '#default_value' => variable_get('site_audit_pagespeed_url', url('', array('absolute' => true))),
+    '#default_value' => $config->get('site_audit_pagespeed_url'),
   );
   $form['site_audit_pagespeed_api_key'] = array(
     '#title' => t('Google Pagespeed API Key'),
@@ -61,12 +74,16 @@ function site_audit_settings_form($form, &$form_state) {
       '!link' => l('https://developers.google.com/speed/docs/insights/v1/getting_started#auth', 'https://developers.google.com/speed/docs/insights/v1/getting_started#auth'),
     )),
     '#type' => 'textfield',
-    '#default_value' => variable_get('site_audit_pagespeed_api_key', []),
+    '#default_value' => $config->get('site_audit_pagespeed_api_key'),
   );
 
   return system_settings_form($form);
 }
 
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
 function site_audit_get_web_reports() {
   $reports = file_scan_directory(__dir__ . '/Report', '/\.php/');
   $supported_reports = [];
@@ -81,6 +98,7 @@ function site_audit_get_web_reports() {
   return $supported_reports;
 }
 
+
 /**
  * Menu callback for the report page UI.
  *
@@ -88,14 +106,14 @@ function site_audit_get_web_reports() {
  */
 function site_audit_report() {
   $output = [];
-  $reports = variable_get('site_audit_reports') ?: site_audit_get_web_reports();
+  $reports = config_get('site_audit.settings', 'site_audit_reports') ? : site_audit_get_web_reports();
 
   foreach ($reports as $report_class) {
     $class_name = "SiteAuditReport" . $report_class;
     $output['reports']['#items'][] = "$class_name Report";
     $report = new $class_name();
     $output[$report_class] = [
-      '#markup' => $report->toHtml()
+      '#markup' => $report->toHtml(),
     ];
   }
 
@@ -181,7 +199,7 @@ if (!function_exists('dt')) {
 //
 //if (!defined('DRUSH_COMMAND') && !function_exists('drush_set_error')) {
 //  function drush_set_error($message, $type = NULL) {
-//    drupal_set_message($message);
+//    backdrop_set_message($message);
 //  }
 //}
 //
@@ -238,6 +256,101 @@ if (!function_exists('dt')) {
  */
 function site_audit_env_is_dev() {
   return FALSE;
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function site_audit_autoload_info() {
+  return array(
+    'SiteAuditCheckAbstract' => 'Check/Abstract.php',
+    'SiteAuditCheckBestPracticesFast404' => 'Check/BestPractices/Fast404.php',
+    'SiteAuditCheckBestPracticesMultisite' => 'Check/BestPractices/Multisite.php',
+    'SiteAuditCheckBestPracticesPhpFilter' => 'Check/BestPractices/PhpFilter.php',
+    'SiteAuditCheckBestPracticesSettings' => 'Check/BestPractices/Settings.php',
+    'SiteAuditCheckBestPracticesSitesAll' => 'Check/BestPractices/SitesAll.php',
+    'SiteAuditCheckBestPracticesSitesDefault' => 'Check/BestPractices/SitesDefault.php',
+    'SiteAuditCheckBestPracticesSitesSuperfluous' => 'Check/BestPractices/SitesSuperfluous.php',
+    'SiteAuditCheckBlockCache' => 'Check/Block/Cache.php',
+    'SiteAuditCheckBlockCacheReport' => 'Check/Block/CacheReport.php',
+    'SiteAuditCheckBlockEnabled' => 'Check/Block/Enabled.php',
+    'SiteAuditCheckCacheAnon' => 'Check/Cache/Anon.php',
+    'SiteAuditCheckCacheBackends' => 'Check/Cache/Backends.php',
+    'SiteAuditCheckCacheBins' => 'Check/Cache/Bins.php',
+    'SiteAuditCheckCacheDefaultClass' => 'Check/Cache/DefaultClass.php',
+    'SiteAuditCheckCacheLifetime' => 'Check/Cache/Lifetime.php',
+    'SiteAuditCheckCacheLock' => 'Check/Cache/Lock.php',
+    'SiteAuditCheckCachePageCompression' => 'Check/Cache/PageCompression.php',
+    'SiteAuditCheckCachePageExpire' => 'Check/Cache/PageExpire.php',
+    'SiteAuditCheckCachePreprocessCss' => 'Check/Cache/PreprocessCss.php',
+    'SiteAuditCheckCachePreprocessJs' => 'Check/Cache/PreprocessJs.php',
+    'SiteAuditCheckCodebaseManagedFileCount' => 'Check/Codebase/ManagedFileCount.php',
+    'SiteAuditCheckCodebaseManagedFileSize' => 'Check/Codebase/ManagedFileSize.php',
+    'SiteAuditCheckCodebaseSizeAll' => 'Check/Codebase/SizeAll.php',
+    'SiteAuditCheckCodebaseSizeFiles' => 'Check/Codebase/SizeFiles.php',
+    'SiteAuditCheckContentContentTypes' => 'Check/Content/ContentTypes.php',
+    'SiteAuditCheckContentContentTypesUnused' => 'Check/Content/ContentTypesUnused.php',
+    'SiteAuditCheckContentDuplicateTitles' => 'Check/Content/DuplicateTitles.php',
+    'SiteAuditCheckContentFieldCount' => 'Check/Content/FieldCount.php',
+    'SiteAuditCheckContentFieldEnabled' => 'Check/Content/FieldEnabled.php',
+    'SiteAuditCheckContentFieldInstances' => 'Check/Content/FieldInstances.php',
+    'SiteAuditCheckContentFieldsUnused' => 'Check/Content/FieldsUnused.php',
+    'SiteAuditCheckContentVocabularies' => 'Check/Content/Vocabularies.php',
+    'SiteAuditCheckContentVocabulariesUnused' => 'Check/Content/VocabulariesUnused.php',
+    'SiteAuditCheckCronEnabled' => 'Check/Cron/Enabled.php',
+    'SiteAuditCheckCronLast' => 'Check/Cron/Last.php',
+    'SiteAuditCheckCronRunning' => 'Check/Cron/Running.php',
+    'SiteAuditCheckDatabaseCollation' => 'Check/Database/Collation.php',
+    'SiteAuditCheckDatabaseEngine' => 'Check/Database/Engine.php',
+    'SiteAuditCheckDatabaseRowCount' => 'Check/Database/RowCount.php',
+    'SiteAuditCheckDatabaseSize' => 'Check/Database/Size.php',
+    'SiteAuditCheckExtensionsCount' => 'Check/Extensions/Count.php',
+    'SiteAuditCheckExtensionsDev' => 'Check/Extensions/Dev.php',
+    'SiteAuditCheckExtensionsDisabled' => 'Check/Extensions/Disabled.php',
+    'SiteAuditCheckExtensionsDuplicate' => 'Check/Extensions/Duplicate.php',
+    'SiteAuditCheckExtensionsMissing' => 'Check/Extensions/Missing.php',
+    'SiteAuditCheckExtensionsRedundant' => 'Check/Extensions/Redundant.php',
+    'SiteAuditCheckExtensionsSecurity' => 'Check/Extensions/Security.php',
+    'SiteAuditCheckExtensionsUnrecommended' => 'Check/Extensions/Unrecommended.php',
+    'SiteAuditCheckExtensionsUpdate' => 'Check/Extensions/Update.php',
+    'SiteAuditCheckFrontEndTemplateFiles' => 'Check/FrontEnd/TemplateFiles.php',
+    'SiteAuditCheckInsightsAnalyze' => 'Check/Insights/Analyze.php',
+    'SiteAuditCheckRolesRolesList' => 'Check/Roles/RolesList.php',
+    'SiteAuditCheckRolesRolesPermissions' => 'Check/Roles/RolesPermissions.php',
+    'SiteAuditCheckSecurityMenuRouter' => 'Check/Security/MenuRouter.php',
+    'SiteAuditCheckStatusSystem' => 'Check/Status/System.php',
+    'SiteAuditCheckUsersBlockedNumberOne' => 'Check/Users/BlockedNumberOne.php',
+    'SiteAuditCheckUsersCountAll' => 'Check/Users/CountAll.php',
+    'SiteAuditCheckUsersCountBlocked' => 'Check/Users/CountBlocked.php',
+    'SiteAuditCheckUsersWhoIsNumberOne' => 'Check/Users/WhoIsNumberOne.php',
+    'SiteAuditCheckViewsCacheOutput' => 'Check/Views/CacheOutput.php',
+    'SiteAuditCheckViewsCacheResults' => 'Check/Views/CacheResults.php',
+    'SiteAuditCheckViewsCount' => 'Check/Views/Count.php',
+    'SiteAuditCheckViewsEnabled' => 'Check/Views/Enabled.php',
+    'SiteAuditCheckWatchdog404' => 'Check/Watchdog/404.php',
+    'SiteAuditCheckWatchdogAge' => 'Check/Watchdog/Age.php',
+    'SiteAuditCheckWatchdogCount' => 'Check/Watchdog/Count.php',
+    'SiteAuditCheckWatchdogEnabled' => 'Check/Watchdog/Enabled.php',
+    'SiteAuditCheckWatchdogPhp' => 'Check/Watchdog/Php.php',
+    'SiteAuditCheckWatchdogSyslog' => 'Check/Watchdog/Syslog.php',
+    'SiteAuditReportAbstract' => 'Report/Abstract.php',
+    'SiteAuditReportBestPractices' => 'Report/BestPractices.php',
+    'SiteAuditReportBlock' => 'Report/Block.php',
+    'SiteAuditReportCache' => 'Report/Cache.php',
+    'SiteAuditReportCodebase' => 'Report/Codebase.php',
+    'SiteAuditReportContent' => 'Report/Content.php',
+    'SiteAuditReportCron' => 'Report/Cron.php',
+    'SiteAuditReportDatabase' => 'Report/Database.php',
+    'SiteAuditReportExtensions' => 'Report/Extensions.php',
+    'SiteAuditReportFrontEnd' => 'Report/FrontEnd.php',
+    'SiteAuditReportInsights' => 'Report/Insights.php',
+    'SiteAuditReportRoles' => 'Report/Roles.php',
+    'SiteAuditReportSecurity' => 'Report/Security.php',
+    'SiteAuditReportStatus' => 'Report/Status.php',
+    'SiteAuditReportUsers' => 'Report/Users.php',
+    'SiteAuditReportViews' => 'Report/Views.php',
+    'SiteAuditReportWatchdog' => 'Report/Watchdog.php',
+  );
 }
 
 

@@ -84,32 +84,36 @@ class SiteAuditCheckBlockCacheReport extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    $blocks = _block_rehash($this->registry['theme_default'] ?? null);
+    $blocks = config_get('block.settings');
+
     // Only check enabled blocks.
-    foreach ($blocks as $bid => $block) {
-      if ($block['region'] == -1) {
-        unset($blocks[$bid]);
+    foreach ($blocks as $block_id => $block) {
+      if ($block['region'] === BLOCK_REGION_NONE) {
+        unset($blocks[$block_id]);
       }
     }
+
     // Make sure there are blocks to check.
     if (empty($blocks)) {
       $this->abort = TRUE;
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_WARN;
     }
 
-    // Human readable order.
-    usort($blocks, function($a, $b) {
+    // Human-readable order.
+    usort($blocks, function ($a, $b) {
       return strcmp($a['module'] . $a['delta'], $b['module'] . $b['delta']);
     });
 
-    $this->registry['blocks'] = array();
-    foreach ($blocks as $block) {
-      $this->registry['blocks'][] = array(
+    $this->registry['blocks'] = [];
+
+    foreach ($blocks as $block_id => $block) {
+      $this->registry['blocks'][] = [
         'module' => $block['module'],
         'info' => $block['info'],
         'state' => $this->getCacheStateLabel($block['cache']),
-      );
+      ];
     }
+
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
   }
 

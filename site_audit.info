@@ -1,6 +1,7 @@
 name = Site Audit
 description =Site Audit is a Drupal static site analysis platform that generates reports with actionable best practice recommendations.
-core = 7.x
+backdrop = 1.x
+type = module
 package = Development
 
 ; TODO deprecate the custom version string to prepare for drupal.org release script

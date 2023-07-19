@@ -62,17 +62,17 @@ class SiteAuditCheckRolesRolesPermissions extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    $sql_query  = 'SELECT name';
-    $sql_query .= ', COUNT({role}.rid) AS count_permissions ';
-    $sql_query .= 'FROM {role} ';
-    $sql_query .= 'LEFT JOIN {role_permission} ON {role}.rid = {role_permission}.rid ';
-    $sql_query .= 'GROUP BY {role}.rid ';
-    $sql_query .= 'ORDER BY name ASC ';
-    $result = db_query($sql_query);
-    foreach ($result as $row) {
-      $this->registry['roles'][$row->name] = $row->count_permissions;
+    $roles = config_get('user.role');
+
+    $this->registry['roles'] = [];
+
+    foreach ($roles as $rid => $role) {
+      $permissions = isset($role['permissions']) ? count($role['permissions']) : 0;
+      $this->registry['roles'][$role['name']] = $permissions;
     }
+
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
   }
+
 
 }

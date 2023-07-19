@@ -1,0 +1,6 @@
+{
+    "_config_name": "site_audit.settings",
+    "site_audit_reports": "",
+    "site_audit_pagespeed_url": "dynamic value in file /site_audit/site_audit.module line 56",
+    "site_audit_pagespeed_api_key": "dynamic value in file /site_audit/site_audit.module line 64"
+}
