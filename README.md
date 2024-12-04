@@ -20,32 +20,30 @@ multiple formats, including plain text, HTML, and JSON.
 Site Audit can also be extended by other projects to add custom reports and
 checks.
 
-# Reports
+## Reports
 
 Site Audit includes a number of comprehensive reports, each consisting of one
 or more checks. Site Audit reports include:
 
 * Best Practices - structural recommendations
-* Block - caching
+* Block - custom block report
 * Cache - optimal Backdrop caching settings
 * Codebase - size of the site; size and count of managed files
 * Content - checks for unused content types, vocabularies
 * Cron - Backdrop's built-in cron
 * Database - collation, engine, row counts, and size
 * Extensions - count, development modules, duplicates, missing
-* Insights - Analyze site with Google PageSpeed Insights
 * Status - check for failures in Backdrop's built-in status report
 * Users - blocked user #1, number of normal and blocked users
 * Roles - list of roles, percentage of permissions assigned to roles
 * Views - caching settings
 * Watchdog - 404 error count, age, number of entries, enabled, PHP errors
 
-# Installation
+## Installation
 
-Site Audit is not a module; do not install it in your site root.
+- Install this module using the official [Backdrop CMS instructions](https://backdropcms.org/user-guide/modules).
 
-Copy the entire Site Audit project to either your unified or personal Drush
-folder in the commands subdirectory, like
+- Enable the core OpenAI module and one or more submodules that meet your needs.
 
 ````
 ~/.drush/commands
@@ -60,19 +58,19 @@ drush cc drush
 See https://github.com/drush-ops/drush#commands to learn more about installing
 commands into Drush.
 
-# Usage
+## Usage
 
 ````
 drush help --filter=site_audit
 ````
 
-## Audit cache
+### Audit cache
 
 ````
 drush ac
 ````
 
-## Produce a HTML report
+### Produce a HTML report
 
 Create a new file or overwrite:
 
@@ -93,7 +91,7 @@ Twitter Bootstrap for styling:
 drush aa --html --bootstrap --detail --skip=insights > ~/Desktop/report.html
 ````
 
-## Skipping reports or checks
+### Skipping reports or checks
 
 For the Audit All command, an individual report can be skipped by name using
 the option --skip.
@@ -117,7 +115,7 @@ Cache report:
 $conf['site_audit']['opt_out']['CachePageCompression'] = TRUE;
 ````
 
-## Vendor specific options
+### Vendor specific options
 
 Some commands such as the cache audit (ac) have the ability to optionally
 produce results that are specific to a particular platform. Currently only
@@ -128,7 +126,7 @@ have explicit support that will be helpful to other developers.
 drush @pantheon.SITENAME.ENV --vendor=pantheon --detail ac
 ````
 
-# Adding Reports and Checks
+## Adding Reports and Checks
 
 There are two classes that you should be aware of:
 
@@ -151,7 +149,7 @@ The AuditCheck class has a number of helpful properties:
   check itself. Use sparingly, as the registry itself is not cleared. This is
   safer than a global.
 
-## Custom Reports and Checks
+### Custom Reports and Checks
 
 Site Audit supports specialized Reports or Checks that are specific to a
 particular use case or project. A couple steps are needed; regardless of the
@@ -164,7 +162,7 @@ Checks within the actual Drush command, but I'd recommend instead requiring the
 code only upon execution, otherwise every other drush command execution will
 include all the overhead of loading custom code.
 
-### Custom Reports
+#### Custom Reports
 
 In ````hook_drush_command()````, define a command with the following format:
 
@@ -229,7 +227,7 @@ function security_review_drush_command_alter(&$command) {
 }
 ````
 
-### Custom Checks
+#### Custom Checks
 
 Custom Checks should extend ````SiteAuditCheckAbstract````. If including HTML,
 be sure to check to see if the HTML option is being used. For example:
@@ -250,7 +248,7 @@ if (drush_get_option('html')) {
 }
 ````
 
-### Adding custom Checks to an existing Report
+#### Adding custom Checks to an existing Report
 
 As Check names are defined in the Report command, just alter the target
 command name.
@@ -269,7 +267,7 @@ function security_review_drush_command_alter(&$command) {
 }
 ````
 
-# Release notes
+## Release notes
 
 Release notes are maintained at https://www.drupal.org/node/2022771/release
 
@@ -285,10 +283,23 @@ The response will be in the form:
 ````
 Site Audit v#.#
 ````
+## Issues
 
-# Credits
+Bugs and feature requests should be reported in the [Issue Queue](https://github.com/backdrop-contrib/site_audit/issues).
 
-Site Audit is written and maintained by Jon Peck, http://about.me/jonpeck
+## Current Maintainer
+
+[Justin Keiser](https://github.com/keiserjb)
+
+## Credits
+
+Site Audit is written and maintained by [Jon Peck](http://about.me/jonpeck)
+
+Other Drupal maintainers are:
+
+[John Pugh](https://www.drupal.org/u/jon-pugh)
+[James Glasgow](https://www.drupal.org/u/jrglasgow)
+[Norman Kämper-Leymann](https://www.drupal.org/u/leymannx)
 
 Site Audit can be found at:
 
