@@ -13,14 +13,14 @@ class SiteAuditCheckBestPracticesSettings extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getLabel().
    */
   public function getLabel() {
-    return dt('sites/default/settings.php');
+    return dt('settings.php');
   }
 
   /**
    * Implements \SiteAudit\Check\Abstract\getDescription().
    */
   public function getDescription() {
-    return dt('Check if the configuration file exists.');
+    return dt('Check if the configuration file exists. It does.');
   }
 
   /**
@@ -48,7 +48,7 @@ class SiteAuditCheckBestPracticesSettings extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getResultWarn().
    */
   public function getResultWarn() {
-    return dt('sites/default/settings.php is a symbolic link.');
+    return dt('settings.php is a symbolic link.');
   }
 
   /**
@@ -67,16 +67,24 @@ class SiteAuditCheckBestPracticesSettings extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    $drupal_root = DRUPAL_ROOT;
-    if (file_exists($drupal_root . '/sites/default/settings.php')) {
-      if (is_link($drupal_root . '/sites/default/settings.php')) {
+    $backdrop_root = BACKDROP_ROOT;
+    $settings_file = $backdrop_root . '/settings.php';
+
+    // Check if the settings.php file exists.
+    if (file_exists($settings_file)) {
+      // Check if it is a symbolic link.
+      if (is_link($settings_file)) {
         return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_WARN;
       }
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
     }
+
+    // Check if this is a multisite setup.
     if (isset($this->registry['multisites']) && !empty($this->registry['multisites'])) {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
     }
+
+    // If no settings.php is found, return FAIL.
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL;
   }
 

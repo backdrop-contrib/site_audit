@@ -1,5 +1,5 @@
 name = Site Audit
-description =Site Audit is a Drupal static site analysis platform that generates reports with actionable best practice recommendations.
+description =Site Audit is a Backdrop static site analysis platform that generates reports with actionable best practice recommendations.
 backdrop = 1.x
 type = module
 package = Development

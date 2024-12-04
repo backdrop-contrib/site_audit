@@ -21,10 +21,10 @@ class SiteAuditCheckCachePageCompression extends SiteAuditCheckAbstract {
    */
   public function getDescription() {
     if ($this->getOption('vendor') == 'pantheon') {
-      return dt('Verify that Drupal is not set to compress cached pages.');
+      return dt('Verify that Backdrop is not set to compress cached pages.');
     }
     else {
-      return dt('Verify that Drupal is set to compress cached pages.');
+      return dt('Verify that Backdrop is set to compress cached pages.');
     }
   }
 
@@ -68,7 +68,7 @@ class SiteAuditCheckCachePageCompression extends SiteAuditCheckAbstract {
   public function getAction() {
     if (!in_array($this->score, array(SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS))) {
       if ($this->getOption('vendor') == 'pantheon') {
-        return dt('Pantheon compresses your pages for you. Don\'t make Drupal do the work! Go to /admin/config/development/performance and uncheck "Compress cached pages".');
+        return dt('Pantheon compresses your pages for you. Don\'t make Backdrop do the work! Go to /admin/config/development/performance and uncheck "Compress cached pages".');
       }
       else {
         return dt('Go to /admin/config/development/performance and check "Compress cached pages".');
@@ -80,14 +80,19 @@ class SiteAuditCheckCachePageCompression extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    global $conf;
+    $system_core_config = config_get('system.core');
+    $page_compression = $system_core_config['page_compression'] ?? 0;
+
+    // Check if the vendor is Pantheon.
     if ($this->getOption('vendor') == 'pantheon') {
-      if (!$conf['page_compression']) {
+      if (!$page_compression) {
         return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
       }
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL;
     }
-    if (empty($conf['page_compression'])) {
+
+    // For other environments, ensure page compression is enabled.
+    if (empty($page_compression)) {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL;
     }
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;

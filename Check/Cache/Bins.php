@@ -82,16 +82,27 @@ class SiteAuditCheckCacheBins extends SiteAuditCheckAbstract {
   /**
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
+  /**
+   * Implements \SiteAudit\Check\Abstract\calculateScore().
+   */
   public function calculateScore() {
-    global $conf;
+    global $settings;
     $this->registry['cache_bins'] = array();
-    $variables = preg_grep('/^cache_class_/', array_keys($conf));
-    if (!empty($variables)) {
-      foreach ($variables as $variable_name) {
-        $this->registry['cache_bins'][$variable_name] = $conf[$variable_name];
+
+    // Look for defined cache bins in $settings.
+    if (!empty($settings)) {
+      foreach ($settings as $key => $value) {
+        if (strpos($key, 'cache_class_') === 0) {
+          $bin = str_replace('cache_class_', '', $key);
+          $this->registry['cache_bins'][$bin] = $value;
+        }
       }
     }
-    return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
+
+    if (!empty($this->registry['cache_bins'])) {
+      return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
+    }
+    return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
   }
 
 }

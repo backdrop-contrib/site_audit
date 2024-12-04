@@ -20,7 +20,7 @@ class SiteAuditCheckUsersCountBlocked extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getDescription().
    */
   public function getDescription() {
-    return dt('Total number of blocked Drupal users.');
+    return dt('Total number of blocked Backdrop users.');
   }
 
   /**

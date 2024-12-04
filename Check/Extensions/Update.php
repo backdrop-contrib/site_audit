@@ -83,65 +83,59 @@ class SiteAuditCheckExtensionsUpdate extends SiteAuditCheckAbstract {
   /**
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
+  /**
+   * Implements \SiteAudit\Check\Abstract\calculateScore().
+   */
   public function calculateScore() {
-    $this->registry['projects_update'] = $this->registry['projects_security'] = array();
+    $this->registry['projects_update'] = $this->registry['projects_security'] = [];
 
+    // Get available update information.
     if ($available = update_get_available(TRUE)) {
       module_load_include('inc', 'update', 'update.compare');
       $data = update_calculate_project_data($available);
+
       foreach ($data as $project_name => $project) {
-        // Discard custom projects.
+        // Discard custom projects or projects with unknown status.
         if ($project['status'] == UPDATE_UNKNOWN) {
           unset($data[$project_name]);
           continue;
         }
-        // Discard projects with unknown installation path.
-//          if ($project_name != 'drupal' && !isset($projects[$project_name]['path'])) {
-//            unset($data[$project_name]);
-//            continue;
-//          }
 
-        // Add some info from the project to $data.
-//          $data[$project_name] += array(
-//            'path' => isset($projects[$project_name]['path']) ? $projects[$project_name]['path'] : '',
-//            'label' => $projects[$project_name]['label'],
-//          );
-        // Store all releases, not just the ones selected by update.module.
-        // We use it to allow the user to update to a specific version.
+        // Add releases data if available.
         if (isset($available[$project_name]['releases'])) {
           $data[$project_name]['releases'] = $available[$project_name]['releases'];
         }
       }
       $values = $data;
+    } else {
+      $values = [];
     }
+
     $update_info = $values;
-//
-//    // Only show updatable projects.
-//    foreach ($update_info as $name => $project) {
-//      if ((!isset($project['updateable']) || !$project['updateable'])) {
-//        unset($update_info[$name]);
-//      }
-//    }
-    // Build only useful data.
+
+    // Build useful data.
     foreach ($update_info as $project_name => $project_data) {
-      if ($project_data['existing_version'] == $project_data['recommended']) {
+      // Check if "recommended" key exists before using it.
+      if (!isset($project_data['recommended']) || $project_data['existing_version'] == $project_data['recommended']) {
         continue;
       }
 
-      $short_info = array(
-        'existing_version' => $project_data['existing_version'],
+      $short_info = [
+        'existing_version' => $project_data['existing_version'] ?? '',
         'candidate_version' => $project_data['recommended'] ?? '',
-        'status_msg' => $project_data['link'] ? l($project_data['link'], $project_data['link']): '',
-        'label' => $project_data['title'],
-      );
+        'status_msg' => isset($project_data['link']) ? l($project_data['link'], $project_data['link']) : '',
+        'label' => $project_data['title'] ?? $project_name,
+      ];
+
+      // Categorize updates as security or general updates.
       if (stripos($short_info['status_msg'], 'security') !== FALSE) {
         $this->registry['projects_security'][$project_name] = $short_info;
-      }
-      else {
+      } else {
         $this->registry['projects_update'][$project_name] = $short_info;
       }
     }
 
+    // Return score based on updates.
     if (!empty($this->registry['projects_update'])) {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_WARN;
     }

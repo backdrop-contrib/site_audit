@@ -280,13 +280,13 @@ abstract class SiteAuditCheckAbstract {
   }
 
   /**
-   * Gives path relative to DRUPAL_ROOT of the path is inside Drupal.
+   * Gives path relative to DRUPAL_ROOT of the path is inside Backdrop.
    *
    * @param string $filename
    *   Absolute path of a file or directory.
    *
    * @return string
-   *   Path relative to Drupal root path.
+   *   Path relative to Backdrop root path.
    */
   public function getRelativePath($filename) {
     $pos = strpos($filename, DRUPAL_ROOT);
@@ -297,7 +297,7 @@ abstract class SiteAuditCheckAbstract {
   }
 
   /**
-   * drush_get_option if running with drush. Sane defaults when called in Drupal.
+   * drush_get_option if running with drush. Sane defaults when called in Backdrop.
    */
   static public function getOption($name, $default = null) {
     return SiteAuditReportAbstract::getOption($name, $default);

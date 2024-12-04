@@ -52,20 +52,30 @@ class SiteAuditCheckBlockEnabled extends SiteAuditCheckAbstract {
   /**
    * Implements \SiteAudit\Check\Abstract\getAction().
    */
-  public function getAction() {}
+  public function getAction() {
+    if ($this->score === SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_WARN) {
+      return dt('Go to /admin/appearance and set a default theme to ensure proper rendering of site elements.');
+    }
+  }
 
   /**
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
     if (!module_exists('block')) {
+      watchdog('site_audit', 'Block module is not enabled.', [], WATCHDOG_DEBUG);
       $this->abort = TRUE;
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
     }
-    $this->registry['theme_default'] = variable_get('theme_default');
-    if (!$this->registry['theme_default']) {
+
+    $this->registry['theme_default'] = config_get('system.core', 'theme_default');
+
+    if (empty($this->registry['theme_default'])) {
+      watchdog('site_audit', 'No default theme set.', [], WATCHDOG_DEBUG);
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_WARN;
     }
+
+    watchdog('site_audit', 'Block Enabled check passed.', [], WATCHDOG_DEBUG);
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
   }
 

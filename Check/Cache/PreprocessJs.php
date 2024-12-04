@@ -13,14 +13,14 @@ class SiteAuditCheckCachePreprocessJs extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getLabel().
    */
   public function getLabel() {
-    return dt('Aggregate JavaScript files in Drupal');
+    return dt('Aggregate JavaScript files in Backdrop');
   }
 
   /**
    * Implements \SiteAudit\Check\Abstract\getDescription().
    */
   public function getDescription() {
-    return dt('Verify that Drupal is aggregating JavaScript.');
+    return dt('Verify that Backdrop is aggregating JavaScript.');
   }
 
   /**
@@ -62,13 +62,15 @@ class SiteAuditCheckCachePreprocessJs extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    global $conf;
-    if (!empty($conf['preprocess_js'])) {
+    // Load the 'preprocess_js' setting from 'system.core'.
+    $preprocess_js = config('system.core')->get('preprocess_js');
+
+    // Check if JS aggregation and compression is enabled.
+    if ($preprocess_js) {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
     }
-    if (site_audit_env_is_dev()) {
-      return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
-    }
+
+    // Fail if 'preprocess_css' is not enabled.
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL;
   }
 

@@ -35,10 +35,10 @@ class SiteAuditCheckCronEnabled extends SiteAuditCheckAbstract {
    */
   public function getResultInfo() {
     if (module_exists('elysia_cron')) {
-      return dt('Drupal Cron is disabled, but Elysia Cron is being used instead.');
+      return dt('Backdrop Cron is disabled, but Elysia Cron is being used instead.');
     }
     if (module_exists('ultimate_cron')) {
-      return dt('Drupal Cron is disabled, but Ultimate Cron is being used instead.');
+      return dt('Backdrop Cron is disabled, but Ultimate Cron is being used instead.');
     }
   }
 
@@ -48,7 +48,7 @@ class SiteAuditCheckCronEnabled extends SiteAuditCheckAbstract {
   public function getResultPass() {
     // Manual execution.
     if (!$this->registry['cron_safe_threshold']) {
-      return dt('Drupal Cron frequency is set to never, but has been executed within the past 24 hours (either manually or using drush cron).');
+      return dt('Backdrop Cron frequency is set to never, but has been executed within the past 24 hours (either manually or using drush cron).');
     }
     // Default.
     return dt('Cron is set to run every @minutes minutes.', array(

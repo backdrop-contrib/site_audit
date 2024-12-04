@@ -1,6 +1,22 @@
 {
-    "_config_name": "site_audit.settings",
-    "site_audit_reports": "",
-    "site_audit_pagespeed_url": "dynamic value in file /site_audit/site_audit.module line 56",
-    "site_audit_pagespeed_api_key": "dynamic value in file /site_audit/site_audit.module line 64"
+  "_config_name": "site_audit.settings",
+  "site_audit_reports": {
+    "BestPractices": 1,
+    "Block": 1,
+    "Cache": 1,
+    "Codebase": 1,
+    "Content": 1,
+    "Cron": 1,
+    "Database": 1,
+    "Extensions": 1,
+    "FrontEnd": 1,
+    "Insights": 1,
+    "Security": 1,
+    "Status": 1,
+    "Users": 1,
+    "Views": 1,
+    "Watchdog": 1
+  },
+  "site_audit_pagespeed_url": "",
+  "site_audit_pagespeed_api_key": ""
 }

@@ -20,7 +20,7 @@ class SiteAuditCheckUsersCountAll extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getDescription().
    */
   public function getDescription() {
-    return dt('Total number of Drupal users.');
+    return dt('Total number of Backdrop users.');
   }
 
   /**

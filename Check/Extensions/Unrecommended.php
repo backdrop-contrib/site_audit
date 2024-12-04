@@ -138,7 +138,7 @@ class SiteAuditCheckExtensionsUnrecommended extends SiteAuditCheckAbstract {
   public function getExtensions() {
     $unrecommended_modules = array(
       'apc' => dt("APC takes away space for PHP's opcode cache, potentially degrading performance for high traffic and complex sites. Use redis or another similar caching backend."),
-      'fast_404' => dt("Can cause 404s to be cached by Varnish; use Drupal's 404_fast_html instead"),
+      'fast_404' => dt("Can cause 404s to be cached by Varnish; use Backdrop's 404_fast_html instead"),
       'views_php' => dt('Unfinished and incomplete, Views PHP permits executable code to be stored in the database with no revisioning; a typo introduced in the Views UI can bring down an entire production site with no accountability. See http://api.drupal.org/api/views for details on how to implement your own custom Views functionality.'),
       'views_customfield' => dt('Views Custom Field contains the field for PHP code, which permits executable code to be stored in the database with no revisioning; a typo introduced in the Views UI can bring down an entire production site with no accountability. See http://api.drupal.org/api/views for details on how to implement your own custom Views functionality.'),
       'bad_judgement' => dt('Joke module, framework for anarchy.'),

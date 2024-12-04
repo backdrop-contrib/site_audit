@@ -20,7 +20,7 @@ class SiteAuditCheckCachePageExpire extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getDescription().
    */
   public function getDescription() {
-    return dt('Verify that Drupal\'s cached pages last for at least 15 minutes.');
+    return dt('Verify that Backdrop\'s cached pages last for at least 15 minutes.');
   }
 
   /**
@@ -41,9 +41,8 @@ class SiteAuditCheckCachePageExpire extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getResultPass().
    */
   public function getResultPass() {
-    global $conf;
     return dt('Expiration of cached pages is set to @minutes min.', array(
-      '@minutes' => round($conf['page_cache_maximum_age'] / 60),
+      '@minutes' => round($this->registry['page_cache_maximum_age'] / 60),
     ));
   }
 
@@ -51,9 +50,8 @@ class SiteAuditCheckCachePageExpire extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getResultWarn().
    */
   public function getResultWarn() {
-    global $conf;
     return dt('Expiration of cached pages only set to @minutes min.', array(
-      '@minutes' => round($conf['page_cache_maximum_age'] / 60),
+      '@minutes' => round($this->registry['page_cache_maximum_age'] / 60),
     ));
   }
 
@@ -70,16 +68,19 @@ class SiteAuditCheckCachePageExpire extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    global $conf;
-    if (!isset($conf['page_cache_maximum_age']) || !$conf['page_cache_maximum_age']) {
-      if (site_audit_env_is_dev()) {
-        return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
-      }
+    // Get the 'page_cache_maximum_age' from system.core configuration.
+    $system_core_config = config_get('system.core', 'page_cache_maximum_age');
+
+    if (!$system_core_config) {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL;
     }
-    elseif ($conf['page_cache_maximum_age'] >= 900) {
+
+    $this->registry['page_cache_maximum_age'] = $system_core_config;
+
+    if ($system_core_config >= 900) { // 900 seconds = 15 minutes
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
     }
+
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_WARN;
   }
 

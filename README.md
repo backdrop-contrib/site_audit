@@ -1,11 +1,11 @@
 # Overview
 
-Site Audit is a Drupal static site analysis platform that generates reports with
+Site Audit is a Backdrop static site analysis platform that generates reports with
 actionable best practice recommendations.
 
-Every Drupal site is unique, with its own individual configuration, content,
+Every Backdrop site is unique, with its own individual configuration, content,
 audience, and so forth. With that said, they all have the same core
-infrastructure and configuration; Drupal! Therefore, it's possible to perform
+infrastructure and configuration; Backdrop! Therefore, it's possible to perform
 performance and behavior gathering to inspect any site.
 
 Site Audit uses a technique known as static program analysis. This mechanism
@@ -14,7 +14,7 @@ the observer effect. It's non-intrusive, so no installation into the target site
 or configuration is required.
 
 The end result is a fast, repeatable report that can help detect common problems
-and provide introspection into Drupal sites. Reports can be generated in
+and provide introspection into Backdrop sites. Reports can be generated in
 multiple formats, including plain text, HTML, and JSON.
 
 Site Audit can also be extended by other projects to add custom reports and
@@ -27,14 +27,14 @@ or more checks. Site Audit reports include:
 
 * Best Practices - structural recommendations
 * Block - caching
-* Cache - optimal Drupal caching settings
+* Cache - optimal Backdrop caching settings
 * Codebase - size of the site; size and count of managed files
 * Content - checks for unused content types, vocabularies
-* Cron - Drupal's built-in cron
+* Cron - Backdrop's built-in cron
 * Database - collation, engine, row counts, and size
 * Extensions - count, development modules, duplicates, missing
 * Insights - Analyze site with Google PageSpeed Insights
-* Status - check for failures in Drupal's built-in status report
+* Status - check for failures in Backdrop's built-in status report
 * Users - blocked user #1, number of normal and blocked users
 * Roles - list of roles, percentage of permissions assigned to roles
 * Views - caching settings
@@ -176,7 +176,7 @@ $items['audit_REPORT'] = array(
   // collisions.
   'aliases' => array('aN'),
   // Specify the maximum bootstrap required for your Checks; if interaction with
-  // the actual Drupal site is required, use DRUSH_BOOTSTRAP_DRUPAL_FULL.
+  // the actual Backdrop site is required, use DRUSH_BOOTSTRAP_DRUPAL_FULL.
   'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
   // Names of the individual checks, in order of execution.
   'checks' => array(

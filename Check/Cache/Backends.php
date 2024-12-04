@@ -55,31 +55,48 @@ class SiteAuditCheckCacheBackends extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getAction().
    */
   public function getAction() {
-    if ($this->score == SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO) {
-      if ($this->getOption('vendor') == 'pantheon') {
+    // Action for INFO score.
+    if ($this->score === SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO) {
+      if ($this->getOption('vendor') === 'pantheon') {
         return dt('Consider using a caching backend such as redis.');
       }
-      elseif ($this->getOption('vendor') == 'acquia') {
+      elseif ($this->getOption('vendor') === 'acquia') {
         return dt('Consider using a caching backend such as memcache.');
       }
       return dt('Consider using a caching backend such as redis or memcache.');
     }
-    if ($this->score == SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL) {
-      return dt('$conf["cache_backends"] should be an array.');
+
+    // Action for FAIL score.
+    if ($this->score === SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL) {
+      return dt('The $settings["cache_backends"] configuration must be an array.');
     }
+
+    // No action for PASS.
+    return '';
   }
 
   /**
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    $this->registry['cache_backends'] = variable_get('cache_backends', array());
-    if (is_string($this->registry['cache_backends'])) {
-      return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL;
+    // Initialize the registry for cache backends.
+    $this->registry['cache_backends'] = [];
+
+    // Check for cache backends defined in settings.php.
+    if (isset($GLOBALS['settings']['cache_backends'])) {
+      // Handle cases where cache_backends is not an array.
+      if (!is_array($GLOBALS['settings']['cache_backends'])) {
+        return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL;
+      }
+
+      // Handle valid cache backends.
+      $this->registry['cache_backends'] = $GLOBALS['settings']['cache_backends'];
+      if (!empty($this->registry['cache_backends'])) {
+        return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
+      }
     }
-    if (is_array($this->registry['cache_backends']) && !empty($this->registry['cache_backends'])) {
-      return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
-    }
+
+    // If no cache backends are defined, fallback to database caching.
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
   }
 

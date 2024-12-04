@@ -5,7 +5,7 @@ then
   exit 1
 fi
 ./vendor/bin/phpcs \
-  --standard=./vendor/drupal/coder/coder_sniffer/Drupal \
+  --standard=./vendor/drupal/coder/coder_sniffer/Backdrop \
   --extensions=php,module,inc,install,test,profile,theme \
   Check \
   Report \

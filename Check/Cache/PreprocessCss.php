@@ -13,14 +13,14 @@ class SiteAuditCheckCachePreprocessCss extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getLabel().
    */
   public function getLabel() {
-    return dt('Aggregate and compress CSS files in Drupal');
+    return dt('Aggregate and compress CSS files in Backdrop');
   }
 
   /**
    * Implements \SiteAudit\Check\Abstract\getDescription().
    */
   public function getDescription() {
-    return dt('Verify that Drupal is aggregating and compressing CSS.');
+    return dt('Verify that Backdrop is aggregating and compressing CSS.');
   }
 
   /**
@@ -61,14 +61,19 @@ class SiteAuditCheckCachePreprocessCss extends SiteAuditCheckAbstract {
   /**
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
+  /**
+   * Implements \SiteAudit\Check\Abstract\calculateScore().
+   */
   public function calculateScore() {
-    global $conf;
-    if (!empty($conf['preprocess_css'])) {
+    // Load the 'preprocess_css' setting from 'system.core'.
+    $preprocess_css = config('system.core')->get('preprocess_css');
+
+    // Check if CSS aggregation and compression is enabled.
+    if ($preprocess_css) {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
     }
-    if (site_audit_env_is_dev()) {
-      return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
-    }
+
+    // Fail if 'preprocess_css' is not enabled.
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL;
   }
 

@@ -100,12 +100,19 @@ class SiteAuditCheckExtensionsDev extends SiteAuditCheckAbstract {
   /**
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
+  /**
+   * Implements \SiteAudit\Check\Abstract\calculateScore().
+   */
   public function calculateScore() {
     $this->registry['extensions_dev'] = array();
-    $extension_info = $this->registry['extensions'];
-    if (empty($extension_info)) {
+
+    // Ensure 'extensions' exists in the registry before accessing it.
+    if (!isset($this->registry['extensions']) || empty($this->registry['extensions'])) {
+      watchdog('site_audit', 'No extensions information found in the registry.', [], WATCHDOG_WARNING);
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
     }
+
+    $extension_info = $this->registry['extensions'];
     $dev_extensions = $this->getExtensions();
 
     foreach ($extension_info as $key => $extension) {
@@ -121,8 +128,7 @@ class SiteAuditCheckExtensionsDev extends SiteAuditCheckAbstract {
         continue;
       }
 
-      // Do not report modules that are dependencies of other modules, such
-      // as field_ui in Drupal Commerce.
+      // Do not report modules that are dependencies of other modules.
       if (isset($extension->required_by) && !empty($extension->required_by) && $key == 'field_ui') {
         unset($extension_info[$key]);
         continue;
@@ -229,7 +235,7 @@ class SiteAuditCheckExtensionsDev extends SiteAuditCheckAbstract {
       'rules_admin' => dt('Development user interface; unnecessary overhead.'),
       'stringoverrides' => dt('Development utility.'),
       'trace' => dt('Debugging utility; degrades performance and potential security risk.'),
-      'upgrade_status' => dt('Development utility for performing a major Drupal core update; should removed after use.'),
+      'upgrade_status' => dt('Development utility for performing a major Backdrop core update; should removed after use.'),
       'user_display_ui' => dt('Development user interface; unnecessary overhead.'),
       'util' => dt('Development utility; unnecessary overhead, potential security risk.'),
       'views_ui' => dt('Development UI; allows privileged users to change site structure which can lead to performance problems or inconsistent behavior. Best practice is to store Views in code and deploy changes instead of allowing editing in live environments.'),

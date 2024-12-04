@@ -20,7 +20,7 @@ class SiteAuditCheckBestPracticesPhpFilter extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getDescription().
    */
   public function getDescription() {
-    return dt('Check if enabled.');
+    return dt('Check if the PHP Filter module is enabled.');
   }
 
   /**
@@ -28,7 +28,7 @@ class SiteAuditCheckBestPracticesPhpFilter extends SiteAuditCheckAbstract {
    */
   public function getResultFail() {
     if ($this->getOption('detail')) {
-      return dt('PHP Filter is enabled! Executable code should never be stored in the database, and support for this feature was removed in Drupal 8 - https://drupal.org/node/1203886');
+      return dt('PHP Filter is enabled! Storing executable code in the database is a major security risk and should never be used. Disable this module immediately.');
     }
     else {
       return dt('PHP Filter is enabled!');
@@ -57,7 +57,7 @@ class SiteAuditCheckBestPracticesPhpFilter extends SiteAuditCheckAbstract {
    */
   public function getAction() {
     if ($this->score == SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL) {
-      return dt('Remove all executable code from your content and move it to your codebase.');
+      return dt('Disable the PHP Filter module and remove all executable code from the database. Move code into your Backdrop CMS codebase or custom modules.');
     }
   }
 
@@ -70,5 +70,4 @@ class SiteAuditCheckBestPracticesPhpFilter extends SiteAuditCheckAbstract {
     }
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
   }
-
 }

@@ -20,7 +20,7 @@ class SiteAuditCheckViewsEnabled extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getDescription().
    */
   public function getDescription() {
-    return dt('Check to see if enabled');
+    return dt('Check if Views is enabled.');
   }
 
   /**
@@ -45,9 +45,7 @@ class SiteAuditCheckViewsEnabled extends SiteAuditCheckAbstract {
   /**
    * Implements \SiteAudit\Check\Abstract\getResultWarn().
    */
-  public function getResultWarn() {
-    return dt('Only Views 7.x-3.x is supported by this tool.');
-  }
+  public function getResultWarn() {}
 
   /**
    * Implements \SiteAudit\Check\Abstract\getAction().
@@ -58,15 +56,15 @@ class SiteAuditCheckViewsEnabled extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
+    // Check if the Views module is enabled.
     if (!module_exists('views')) {
       $this->abort = TRUE;
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
     }
-    $info = drupal_parse_info_file(drupal_get_path('module', 'views') . '/views.info');
-    if (version_compare($info['version'], '7.x-3.0') >= 0) {
-      return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
-    }
-    return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_WARN;
+
+    // Since Views is in core, we assume the supported version.
+    return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
   }
 
 }
+

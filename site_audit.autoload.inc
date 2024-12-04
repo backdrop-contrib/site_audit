@@ -1,23 +1,41 @@
 <?php
 /**
  * @file
- * Autoloader.
+ * Autoloader for SiteAudit classes.
  */
 
+// Dynamically determine the base path of the module.
+define('SITE_AUDIT_BASE_PATH', BACKDROP_ROOT . '/' . backdrop_get_path('module', 'site_audit'));
 
-define('SITE_AUDIT_BASE_PATH', __DIR__);
+// Register the autoloader.
+spl_autoload_register(function ($class) {
+  // Log every class to debug.
+  error_log("Attempting to autoload: $class");
 
-// Autoload Report classes.
-spl_autoload_register(
-  function ($class) {
-    if (strpos($class, 'SiteAuditReport') === 0) {
-      require_once SITE_AUDIT_BASE_PATH . '/Report/' . substr($class, strlen('SiteAuditReport')) . '.php';
+  // Handle SiteAuditReport classes.
+  if (strpos($class, 'SiteAuditReport') === 0) {
+    $report_class = substr($class, strlen('SiteAuditReport'));
+    $file_path = SITE_AUDIT_BASE_PATH . '/Report/' . $report_class . '.php';
+    if (file_exists($file_path)) {
+      require_once $file_path;
+      return;
     }
-    if (strpos($class, 'SiteAuditCheck') === 0) {
-      // Figure out what folder the check is in.
-      require_once SITE_AUDIT_BASE_PATH . '/Check/' . $report . '/' . substr($class, strlen('SiteAuditCheck')) . '.php';
-    }
+    error_log("Report class not found: $class ($file_path)");
   }
-);
 
+  // Handle SiteAuditCheck classes.
+  if (strpos($class, 'SiteAuditCheck') === 0) {
+    $check_class = substr($class, strlen('SiteAuditCheck'));
+    $parts = preg_split('/(?=[A-Z])/', $check_class, -1, PREG_SPLIT_NO_EMPTY);
+    $folder = $parts[0] ?? '';
+    $file = $parts[1] ?? '';
+    $file_path = SITE_AUDIT_BASE_PATH . '/Check/' . $folder . '/' . $file . '.php';
+
+    if (file_exists($file_path)) {
+      require_once $file_path;
+      return;
+    }
+    error_log("Check class not found: $class ($file_path)");
+  }
+});
 

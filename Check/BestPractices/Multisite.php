@@ -56,7 +56,7 @@ class SiteAuditCheckBestPracticesMultisite extends SiteAuditCheckAbstract {
    */
   public function getAction() {
     if ($this->score == SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL) {
-      return dt('See https://www.getpantheon.com/blog/much-ado-about-drupal-multisite for details.');
+      return dt('Ensure that multi-site configurations are necessary and properly managed.');
     }
   }
 
@@ -64,33 +64,25 @@ class SiteAuditCheckBestPracticesMultisite extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    $drupal_root = DRUPAL_ROOT;
-    $handle = opendir($drupal_root . '/sites/');
+    $backdrop_root = BACKDROP_ROOT;
+    $handle = opendir($backdrop_root);
+
     $this->registry['multisites'] = array();
+
     while (FALSE !== ($entry = readdir($handle))) {
-      if (!in_array($entry, array(
-        '.',
-        '..',
-        'default',
-        'all',
-        'example.sites.php',
-        'README.txt',
-        '.svn',
-        '.DS_Store',
-      ))) {
-        if (is_dir($drupal_root . '/sites/' . $entry)) {
+      // Look for potential multisite directories containing a settings.php file.
+      if (!in_array($entry, array('.', '..', 'core', 'files', 'modules', 'themes'))) {
+        $settings_path = $backdrop_root . '/' . $entry . '/settings.php';
+        if (is_dir($backdrop_root . '/' . $entry) && file_exists($settings_path)) {
           $this->registry['multisites'][] = $entry;
         }
       }
     }
     closedir($handle);
+
     if (!empty($this->registry['multisites'])) {
-      if ($this->getOption('vendor') == 'pantheon') {
-        return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL;
-      }
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
     }
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
   }
-
 }

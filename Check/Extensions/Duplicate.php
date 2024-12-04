@@ -100,28 +100,36 @@ class SiteAuditCheckExtensionsDuplicate extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    $this->registry['extensions_dupe'] = array();
-    $drupal_root = DRUPAL_ROOT;
-    $command = "find $drupal_root -xdev -type f -name '*.info' -o -path './" . variable_get('file_public_path', conf_path() . '/files') . "' -prune";
+    $this->registry['extensions_dupe'] = [];
+    $drupal_root = BACKDROP_ROOT;
+
+    // Command to find .info files, excluding public files directory.
+    $command = "find $drupal_root -xdev -type f -name '*.info' -o -path './"
+      . variable_get('file_public_path', conf_path() . '/files') . "' -prune";
     exec($command, $result);
+
     foreach ($result as $path) {
       $path_parts = explode('/', $path);
       $name = substr(array_pop($path_parts), 0, -5);
-      // Safe duplicates.
-      if (in_array($name, array(
+
+      // Skip safe duplicates.
+      if (in_array($name, [
         'drupal_system_listing_compatible_test',
         'drupal_system_listing_incompatible_test',
-      ))) {
+      ])) {
         continue;
       }
+
       if (!isset($this->registry['extensions_dupe'][$name])) {
-        $this->registry['extensions_dupe'][$name] = array();
+        $this->registry['extensions_dupe'][$name] = [];
       }
 
-      $extension_info = array(
+      $extension_info = [
         'path' => substr($path, strlen($drupal_root) + 1),
         'version' => NULL,
-      );
+      ];
+
+      // Parse the .info file for the version key.
       $info = file($drupal_root . '/' . $extension_info['path']);
       foreach ($info as $line) {
         if (strpos($line, 'version') === 0) {
@@ -134,17 +142,17 @@ class SiteAuditCheckExtensionsDuplicate extends SiteAuditCheckAbstract {
       $this->registry['extensions_dupe'][$name][] = $extension_info;
     }
 
-    // Review the detected extensions.
+    // Review detected extensions for duplicates.
     foreach ($this->registry['extensions_dupe'] as $extension_name => $extension_infos) {
-      // No duplicates.
+      // If there's only one instance, remove it from duplicates.
       if (count($extension_infos) == 1) {
         unset($this->registry['extensions_dupe'][$extension_name]);
         continue;
       }
 
-      // If every path is within an installation profile, ignore.
+      // Ignore extensions entirely within an installation profile.
       $paths_in_profile = 0;
-      foreach ($extension_infos as $index => $extension_info) {
+      foreach ($extension_infos as $extension_info) {
         if (strpos($extension_info['path'], 'profiles/') === 0) {
           $paths_in_profile++;
         }
@@ -154,28 +162,30 @@ class SiteAuditCheckExtensionsDuplicate extends SiteAuditCheckAbstract {
         continue;
       }
 
-      // Allow overrides of installation profile extensions.
+      // Skip overrides of installation profile extensions.
+      if (!isset($this->registry['extensions'][$extension_name])) {
+        // Log a debug message if needed:
+        // watchdog('site_audit', 'Extension "@name" not found in registry.', ['@name' => $extension_name], WATCHDOG_DEBUG);
+        continue; // Ensure the extension exists in the registry.
+      }
+
       $extension_object = $this->registry['extensions'][$extension_name];
       if (
-        // The enabled extension has version info.
         isset($extension_object->info['version'])
-        && $extension_object->info['version']
-        // There is a version of the extension in an installation profile.
-        && $paths_in_profile
-        // The extension in question is enabled.
+        && $extension_object->info['version'] // Enabled extension has a version.
+        && $paths_in_profile                 // There is a version in the profile.
         && drush_get_extension_status($extension_object) == 'enabled'
-        // The enabled extension is not in profiles.
-        && strpos($extension_object->uri, 'profiles/') === FALSE
+        && strpos($extension_object->uri, 'profiles/') === FALSE // Enabled is not in profile.
       ) {
         $skip = TRUE;
         foreach ($extension_infos as $extension_info) {
-          // Not within the profile and there's version information.
-          if (strpos($extension_info['path'], 'profiles/') !== FALSE && $extension_info['version']) {
-            // If the installed version is equal or newer to the enabled.
-            if (version_compare($extension_object->info['version'], $extension_info['version']) < 1) {
-              $skip = FALSE;
-              break;
-            }
+          if (
+            strpos($extension_info['path'], 'profiles/') !== FALSE
+            && $extension_info['version']
+            && version_compare($extension_object->info['version'], $extension_info['version']) < 1
+          ) {
+            $skip = FALSE;
+            break;
           }
         }
         if ($skip === TRUE) {
@@ -184,7 +194,7 @@ class SiteAuditCheckExtensionsDuplicate extends SiteAuditCheckAbstract {
       }
     }
 
-    // Determine score.
+    // Determine the score.
     if (count($this->registry['extensions_dupe'])) {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_WARN;
     }

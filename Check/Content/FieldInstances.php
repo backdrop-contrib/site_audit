@@ -101,29 +101,63 @@ class SiteAuditCheckContentFieldInstances extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    // Only available in Drupal 7.22 and above.
-    if (!function_exists('field_info_field_map')) {
-      $this->abort;
+    if (!module_exists('field')) {
+      $this->abort = true;
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
     }
 
-    $this->registry['field_api_map'] = field_info_field_map();
-    $this->registry['field_instance_counts'] = array();
+    $this->registry['field_instance_counts'] = [];
+    $this->registry['field_api_map'] = [];
+    $this->registry['missing_tables'] = [];
 
-    foreach ($this->registry['field_api_map'] as $field_name => $field) {
-      foreach ($field['bundles'] as $entity_type => $bundle_names) {
-        foreach ($bundle_names as $bundle_name) {
-          $query = new EntityFieldQuery();
-          $query
-            ->entityCondition('entity_type', $entity_type)
-            ->entityCondition('bundle', $bundle_name)
-            ->fieldCondition($field_name)
-            ->count();
-          $field_count = $query->execute();
-          $this->registry['field_instance_counts'][$bundle_name][$entity_type][$field_name] = $field_count;
+    // Get active configuration directory.
+    $config_path = config_get_config_directory('active');
+    $config_files = scandir($config_path);
+
+    foreach ($config_files as $file) {
+      // Look for field instance configurations.
+      if (strpos($file, 'field.instance.') === 0) {
+        $field_instance_config = config_get(basename($file, '.json'));
+
+        $field_name = $field_instance_config['field_name'];
+        $entity_type = $field_instance_config['entity_type'];
+        $bundle_name = $field_instance_config['bundle'];
+
+        // Ensure the field map includes this field.
+        if (!isset($this->registry['field_api_map'][$field_name])) {
+          $this->registry['field_api_map'][$field_name] = [
+            'entity_type' => $entity_type,
+            'bundles' => [],
+          ];
         }
+        $this->registry['field_api_map'][$field_name]['bundles'][$bundle_name] = $bundle_name;
+
+        // Check if the database table for this field exists.
+        $table_name = 'field_data_' . $field_name;
+        $table_exists = db_table_exists($table_name);
+
+        if (!$table_exists) {
+          // Log missing table information.
+          $this->registry['missing_tables'][$field_name] = $table_name;
+          continue;
+        }
+
+        // Query the database to count field data.
+        $query = db_query("SELECT COUNT(*) FROM {$table_name} WHERE bundle = :bundle", [':bundle' => $bundle_name]);
+        $field_count = $query->fetchField();
+
+        // Store field instance counts.
+        $this->registry['field_instance_counts'][$bundle_name][$entity_type][$field_name] = $field_count;
       }
     }
+
+    // If any tables are missing, consider logging or alerting about them.
+    if (!empty($this->registry['missing_tables'])) {
+      watchdog('site_audit', 'Missing field tables: @tables', [
+        '@tables' => implode(', ', $this->registry['missing_tables']),
+      ], WATCHDOG_WARNING);
+    }
+
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
   }
 

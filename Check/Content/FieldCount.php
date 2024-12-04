@@ -102,7 +102,7 @@ class SiteAuditCheckContentFieldCount extends SiteAuditCheckAbstract {
   public function calculateScore() {
     $this->registry['field_api_map'] = array();
 
-    // Only available in Drupal 7.22 and above.
+    // Only available in Backdrop 7.22 and above.
     if (!function_exists('field_info_field_map')) {
       $this->abort;
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;

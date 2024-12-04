@@ -93,28 +93,41 @@ class SiteAuditCheckContentVocabularies extends SiteAuditCheckAbstract {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
     }
 
-    $vocabularies = config_get('taxonomy.vocabulary');
+    // Scan for all vocabulary configurations.
+    $this->registry['vocabulary_counts'] = [];
+    $this->registry['vocabulary_unused'] = [];
 
-    $this->registry['vocabulary_counts'] = $this->registry['vocabulary_unused'] = [];
+    // Directory where configuration files are stored.
+    $config_path = config_get_config_directory('active');
+    $config_files = scandir($config_path);
 
-    foreach ($vocabularies as $vid => $vocabulary) {
-      $terms = config_get('taxonomy.vocabulary.' . $vid . '.terms');
+    foreach ($config_files as $file) {
+      // Look for files starting with `taxonomy.vocabulary.`
+      if (strpos($file, 'taxonomy.vocabulary.') === 0) {
+        // Load the vocabulary configuration.
+        $vocabulary_config = config_get(basename($file, '.json'));
+        $vocabulary_name = $vocabulary_config['name'];
 
-      $count = count($terms);
-      if ($count == 0) {
-        $this->registry['vocabulary_unused'][] = $vocabulary['name'];
-      } elseif (!$this->getOption('detail')) {
-        continue;
+        // Query the database for terms in this vocabulary.
+        $query = db_query("SELECT COUNT(*) FROM {taxonomy_term_data} WHERE vocabulary = :vocabulary", [':vocabulary' => $vocabulary_name]);
+        $count = $query->fetchField();
+
+        if ($count == 0) {
+          $this->registry['vocabulary_unused'][] = $vocabulary_name;
+        } elseif (!$this->getOption('detail')) {
+          continue;
+        }
+
+        $this->registry['vocabulary_counts'][$vocabulary_name] = $count;
       }
-
-      $this->registry['vocabulary_counts'][$vocabulary['name']] = $count;
     }
 
-    // No need to check for unused vocabularies if there aren't any.
+    // Abort if no vocabularies have terms.
     if (empty($this->registry['vocabulary_counts'])) {
       $this->abort = true;
     }
 
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
   }
+
 }

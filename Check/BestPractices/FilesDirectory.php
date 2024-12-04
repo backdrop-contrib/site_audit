@@ -1,33 +1,34 @@
 <?php
+
 /**
  * @file
- * Contains \SiteAudit\Check\BestPractices\SitesDefault.
+ * Contains \SiteAudit\Check\BestPractices\FilesDirectory.
  */
 
 /**
- * Class SiteAuditCheckBestPracticesSitesDefault.
+ * Class SiteAuditCheckBestPracticesFilesDirectory.
  */
-class SiteAuditCheckBestPracticesSitesDefault extends SiteAuditCheckAbstract {
+class SiteAuditCheckBestPracticesFilesDirectory extends SiteAuditCheckAbstract {
 
   /**
    * Implements \SiteAudit\Check\Abstract\getLabel().
    */
   public function getLabel() {
-    return dt('sites/default');
+    return dt('files directory');
   }
 
   /**
    * Implements \SiteAudit\Check\Abstract\getDescription().
    */
   public function getDescription() {
-    return dt('Check if it exists and isn\'t symbolic');
+    return dt('Check if the files directory exists and is not a symbolic link.');
   }
 
   /**
    * Implements \SiteAudit\Check\Abstract\getResultFail().
    */
   public function getResultFail() {
-    return dt('sites/default does not exist!');
+    return dt('The files directory does not exist!');
   }
 
   /**
@@ -39,14 +40,14 @@ class SiteAuditCheckBestPracticesSitesDefault extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getResultPass().
    */
   public function getResultPass() {
-    return dt('sites/default is a directory and not a symbolic link.');
+    return dt('The files directory exists and is not a symbolic link.');
   }
 
   /**
    * Implements \SiteAudit\Check\Abstract\getResultWarn().
    */
   public function getResultWarn() {
-    return dt('sites/default exists as a symbolic link.');
+    return dt('The files directory exists as a symbolic link.');
   }
 
   /**
@@ -54,10 +55,10 @@ class SiteAuditCheckBestPracticesSitesDefault extends SiteAuditCheckAbstract {
    */
   public function getAction() {
     if ($this->score == SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL) {
-      return dt('sites/default is necessary; recreate the directory immediately.');
+      return dt('The files directory is necessary; recreate it immediately.');
     }
     if ($this->score == SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_WARN) {
-      return dt('Avoid changing Drupal\'s site structure; remove the symbolic link and recreate sites/default.');
+      return dt('Avoid symbolic links for critical directories; recreate the files directory without symlinks.');
     }
   }
 
@@ -65,14 +66,17 @@ class SiteAuditCheckBestPracticesSitesDefault extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    $drupal_root = DRUPAL_ROOT;
-    if (is_dir($drupal_root . '/sites/default')) {
-      if (is_link($drupal_root . '/sites/default')) {
+    $backdrop_root = BACKDROP_ROOT;
+    $files_dir = $backdrop_root . '/files';
+
+    // Check if the files directory exists.
+    if (is_dir($files_dir)) {
+      // Check if it's a symbolic link.
+      if (is_link($files_dir)) {
         return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_WARN;
       }
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
     }
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL;
   }
-
 }

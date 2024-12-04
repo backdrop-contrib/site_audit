@@ -20,7 +20,7 @@ class SiteAuditCheckCacheAnon extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getDescription().
    */
   public function getDescription() {
-    return dt('Verify Drupal\'s anonymous page caching is enabled.');
+    return dt('Verify Backdrop\'s anonymous page caching is enabled.');
   }
 
   /**
@@ -62,13 +62,17 @@ class SiteAuditCheckCacheAnon extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    global $conf;
-    if (!empty($conf['cache'])) {
+    // Load the 'system.core' configuration.
+    $config = config('system.core');
+
+    // Check if the 'cache' setting is enabled.
+    $cache_enabled = $config->get('cache');
+
+    if ($cache_enabled) {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
     }
-    if (site_audit_env_is_dev()) {
-      return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO;
-    }
+
+    // Return fail if caching is not enabled.
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL;
   }
 

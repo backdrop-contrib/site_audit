@@ -13,14 +13,14 @@ class SiteAuditCheckCodebaseManagedFileCount extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\getLabel().
    */
   public function getLabel() {
-    return dt('Drupal managed file count');
+    return dt('Backdrop managed file count');
   }
 
   /**
    * Implements \SiteAudit\Check\Abstract\getDescription().
    */
   public function getDescription() {
-    return dt('Determine the count of Drupal managed files.');
+    return dt('Determine the count of Backdrop managed files.');
   }
 
   /**

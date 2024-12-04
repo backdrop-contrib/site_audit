@@ -179,38 +179,38 @@ abstract class SiteAuditReportAbstract {
         if ($this->getOption('detail') || $check->getScore() != SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS || $this->percent == SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO) {
           if ($this->getOption('detail')) {
             drush_print(str_repeat(' ', 2) . dt('!label: !description', array(
-              '!label' => $check->getLabel(),
-              '!description' => $check->getDescription(),
-            )));
+                '!label' => $check->getLabel(),
+                '!description' => $check->getDescription(),
+              )));
           }
           else {
             if ($check->getScore() != SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO) {
               drush_print(str_repeat(' ', 2) . dt('!label', array(
-                '!label' => $check->getLabel(),
-              )));
+                  '!label' => $check->getLabel(),
+                )));
             }
           }
           if ($this->percent == SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO || $this->getOption('detail')) {
             if (($check->getScore() != SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_INFO) || $this->getOption('detail')) {
               drush_print(str_repeat(' ', 4) . dt('!result', array(
-                '!result' => $check->getResult(),
-              )));
+                  '!result' => $check->getResult(),
+                )));
             }
             else {
               drush_print(str_repeat(' ', 2) . dt('!result', array(
-                '!result' => $check->getResult(),
-              )));
+                  '!result' => $check->getResult(),
+                )));
             }
           }
           else {
             drush_log(str_repeat(' ', 4) . dt('!result', array(
-              '!result' => $check->getResult(),
-            )), $check->getScoreDrushLevel());
+                '!result' => $check->getResult(),
+              )), $check->getScoreDrushLevel());
           }
           if ($check->renderAction()) {
             drush_print(str_repeat(' ', 6) . dt('!action', array(
-              '!action' => $check->renderAction(),
-            )));
+                '!action' => $check->renderAction(),
+              )));
           }
         }
       }
@@ -334,31 +334,31 @@ abstract class SiteAuditReportAbstract {
    *   Machine readable names.
    */
   public function getCheckNames() {
-//    $commands = drush_get_commands();
-//
-//    // Guess the name of the Drush command.
-//    $command_name_pieces = preg_split('/(?=[A-Z])/', get_called_class());
-//    unset($command_name_pieces[0], $command_name_pieces[1], $command_name_pieces[3]);
-//    $command_name = strtolower(implode('_', $command_name_pieces));
-//    $command = $commands[$command_name];
-//
-//    drush_command_invoke_all_ref('drush_command_alter', $command);
-//
-//    $checks = array();
-//    foreach ($command['checks'] as $check) {
-//      if (is_array($check)) {
-//        $checks[] = $check['name'];
-//        require_once $check['location'];
-//      }
-//      else {
-//        $checks[] = $check;
-//        $base_class_name = 'SiteAuditCheck' . $this->getReportName();
-//        $class_name = $base_class_name . $check;
-//        if (!class_exists($class_name)) {
-//          require_once SITE_AUDIT_BASE_PATH . "/Check/{$this->getReportName()}/$check.php";
-//        }
-//      }
-//    }
+    //    $commands = drush_get_commands();
+    //
+    //    // Guess the name of the Drush command.
+    //    $command_name_pieces = preg_split('/(?=[A-Z])/', get_called_class());
+    //    unset($command_name_pieces[0], $command_name_pieces[1], $command_name_pieces[3]);
+    //    $command_name = strtolower(implode('_', $command_name_pieces));
+    //    $command = $commands[$command_name];
+    //
+    //    drush_command_invoke_all_ref('drush_command_alter', $command);
+    //
+    //    $checks = array();
+    //    foreach ($command['checks'] as $check) {
+    //      if (is_array($check)) {
+    //        $checks[] = $check['name'];
+    //        require_once $check['location'];
+    //      }
+    //      else {
+    //        $checks[] = $check;
+    //        $base_class_name = 'SiteAuditCheck' . $this->getReportName();
+    //        $class_name = $base_class_name . $check;
+    //        if (!class_exists($class_name)) {
+    //          require_once SITE_AUDIT_BASE_PATH . "/Check/{$this->getReportName()}/$check.php";
+    //        }
+    //      }
+    //    }
     $checks = [];
     $check_files = file_scan_directory(__dir__ . '/../Check/' . $this->getReportName(), '/\.php/');
     foreach ($check_files as $check) {

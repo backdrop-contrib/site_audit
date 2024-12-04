@@ -97,8 +97,8 @@ class SiteAuditCheckStatusSystem extends SiteAuditCheckAbstract {
         $item = strip_tags($requirement['title']) . ': ' . $severity;
         if (isset($requirement['value']) && $requirement['value']) {
           $item .= ' - ' . dt('@value', array(
-            '@value' => strip_tags($requirement['value']),
-          ));
+              '@value' => strip_tags($requirement['value']),
+            ));
         }
       }
       $items[] = $item;
@@ -147,45 +147,54 @@ class SiteAuditCheckStatusSystem extends SiteAuditCheckAbstract {
    * Implements \SiteAudit\Check\Abstract\calculateScore().
    */
   public function calculateScore() {
-    // See system/system.admin.inc function system_status().
-    // Load .install files.
-    include_once DRUPAL_ROOT . '/includes/install.inc';
-    drupal_load_updates();
+    // Include the install functions if not already included.
+    include_once BACKDROP_ROOT . '/core/includes/install.inc';
 
-    // Check run-time requirements and status information.
+    // Ensure update information is loaded.
+    backdrop_load_updates();
+
+    // Retrieve runtime requirements.
     $this->registry['requirements'] = module_invoke_all('requirements', 'runtime');
-    usort($this->registry['requirements'], '_system_sort_requirements');
+
+    // Sort requirements by severity.
+    usort($this->registry['requirements'], function ($a, $b) {
+      return ($b['severity'] ?? REQUIREMENT_INFO) - ($a['severity'] ?? REQUIREMENT_INFO);
+    });
 
     $this->percentOverride = 0;
-    $requirements_with_severity = array();
+    $requirements_with_severity = [];
+
+    // Filter out requirements with severity.
     foreach ($this->registry['requirements'] as $key => $value) {
       if (isset($value['severity'])) {
         $requirements_with_severity[$key] = $value;
       }
     }
-    $score_each = 100 / count($requirements_with_severity);
 
-    $worst_severity = REQUIREMENT_INFO;
-    foreach ($this->registry['requirements'] as $requirement) {
-      if (isset($requirement['severity'])) {
+    // Calculate the score based on requirements.
+    if (count($requirements_with_severity) > 0) {
+      $score_each = 100 / count($requirements_with_severity);
+
+      $worst_severity = REQUIREMENT_INFO;
+      foreach ($requirements_with_severity as $requirement) {
         if ($requirement['severity'] > $worst_severity) {
           $worst_severity = $requirement['severity'];
         }
         if ($requirement['severity'] == REQUIREMENT_WARNING) {
           $this->percentOverride += $score_each / 2;
-        }
-        elseif ($requirement['severity'] != REQUIREMENT_ERROR) {
+        } elseif ($requirement['severity'] != REQUIREMENT_ERROR) {
           $this->percentOverride += $score_each;
         }
       }
     }
 
+    // Round the percentage score.
     $this->percentOverride = round($this->percentOverride);
 
+    // Determine the final audit score.
     if ($this->percentOverride > 80) {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
-    }
-    elseif ($this->percentOverride > 60) {
+    } elseif ($this->percentOverride > 60) {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_WARN;
     }
     return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_FAIL;

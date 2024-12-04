@@ -73,7 +73,7 @@ class SiteAuditCheckWatchdog404 extends SiteAuditCheckAbstract {
     ))->fetchField();
     $this->registry['percent_404'] = 0;
 
-    // @TODO: Aggregate 404 entries and return top 10.
+    // @TODO: Aggregate 404 entries and return dtop 10.
     if (!$this->registry['count_404']) {
       return SiteAuditCheckAbstract::AUDIT_CHECK_SCORE_PASS;
     }
