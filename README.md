@@ -43,8 +43,6 @@ or more checks. Site Audit reports include:
 
 - Install this module using the official [Backdrop CMS instructions](https://backdropcms.org/user-guide/modules).
 
-- Enable the core OpenAI module and one or more submodules that meet your needs.
-
 ````
 ~/.drush/commands
 ````
