@@ -307,3 +307,7 @@ Site Audit can be found at:
 Thank you to Suzanne Aldrich, Kelly Bell, Aimee Degnan, Joe Miller, Matt Parker,
 Ben Sheldon, David Strauss, and everyone else who has given feedback and
 suggestions to make this a better project.
+
+## License
+
+This project is GPL v2 software. See the LICENSE.txt file in this directory for complete text.
